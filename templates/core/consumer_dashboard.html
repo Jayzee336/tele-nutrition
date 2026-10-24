@@ -1,0 +1,1456 @@
+{% extends "base.html" %}
+
+{% block title %}My Dashboard | NutriConnect{% endblock %}
+
+{% block content %}
+<div class="consumer-dashboard">
+
+    <!-- Welcome header -->
+    <header class="consumer-welcome">
+        <div class="consumer-welcome-content">
+            <div class="consumer-welcome-label">
+                <span class="consumer-live-dot"></span>
+                YOUR PERSONAL WELLNESS SPACE
+            </div>
+
+            <h1>Your nutrition journey<span class="consumer-title-period">.</span></h1>
+
+            <p>
+                Every healthy choice counts. Review your meals, follow your
+                progress, and stay connected with your dietitian.
+            </p>
+
+            <div class="consumer-welcome-actions">
+                <a href="{% url 'meal_create' %}" class="consumer-primary-action">
+                    <span aria-hidden="true">＋</span>
+                    Log a meal
+                </a>
+
+                <a href="{% url 'appointment_create' %}" class="consumer-secondary-action">
+                    <span aria-hidden="true">♡</span>
+                    Book consultation
+                </a>
+            </div>
+        </div>
+
+        <div class="consumer-welcome-art" aria-hidden="true">
+            <div class="consumer-art-orbit consumer-art-orbit-one"></div>
+            <div class="consumer-art-orbit consumer-art-orbit-two"></div>
+            <div class="consumer-art-circle">
+                <span class="consumer-art-leaf">❧</span>
+            </div>
+            <div class="consumer-art-chip consumer-art-chip-top">
+                <span>✦</span> Small steps matter
+            </div>
+            <div class="consumer-art-chip consumer-art-chip-bottom">
+                <span>♡</span> Your wellness, your pace
+            </div>
+        </div>
+    </header>
+
+    <!-- Nutrition overview -->
+    <section class="consumer-section" aria-labelledby="nutrition-overview-heading">
+        <div class="consumer-section-heading">
+            <div>
+                <p class="consumer-eyebrow">YOUR DAILY SNAPSHOT</p>
+                <h2 id="nutrition-overview-heading">Nutrition overview</h2>
+                <p>Explore the nutrition information you've recorded today.</p>
+            </div>
+            <div class="consumer-heading-decoration" aria-hidden="true">✳</div>
+        </div>
+
+        <div class="consumer-stats-grid">
+
+            <article class="consumer-stat-card consumer-stat-highlight">
+                <div class="consumer-stat-topline">
+                    <span class="consumer-stat-icon consumer-icon-green" aria-hidden="true">☀</span>
+                    <span class="consumer-stat-tag">TODAY</span>
+                </div>
+                <p class="consumer-stat-label">Meals recorded</p>
+                <div class="consumer-stat-number">
+                    {{ today_meals|default_if_none:0 }}
+                </div>
+                <p class="consumer-stat-caption">Meals logged today</p>
+                <div class="consumer-stat-bottom-line consumer-line-green"></div>
+            </article>
+
+            <article class="consumer-stat-card">
+                <div class="consumer-stat-topline">
+                    <span class="consumer-stat-icon consumer-icon-peach" aria-hidden="true">◉</span>
+                    <span class="consumer-stat-tag">TODAY</span>
+                </div>
+                <p class="consumer-stat-label">Calories</p>
+                <div class="consumer-stat-number">
+                    {{ total_calories|default_if_none:0 }}
+                    <span class="consumer-stat-unit">kcal</span>
+                </div>
+                <p class="consumer-stat-caption">Total calories logged</p>
+                <div class="consumer-stat-bottom-line consumer-line-peach"></div>
+            </article>
+
+            <article class="consumer-stat-card">
+                <div class="consumer-stat-topline">
+                    <span class="consumer-stat-icon consumer-icon-lavender" aria-hidden="true">P</span>
+                    <span class="consumer-stat-tag">TODAY</span>
+                </div>
+                <p class="consumer-stat-label">Protein</p>
+                <div class="consumer-stat-number">
+                    {{ total_protein|default_if_none:0|floatformat:2 }}
+                    <span class="consumer-stat-unit">g</span>
+                </div>
+                <p class="consumer-stat-caption">Protein recorded today</p>
+                <div class="consumer-stat-bottom-line consumer-line-lavender"></div>
+            </article>
+
+            <article class="consumer-stat-card">
+                <div class="consumer-stat-topline">
+                    <span class="consumer-stat-icon consumer-icon-blue" aria-hidden="true">C</span>
+                    <span class="consumer-stat-tag">TODAY</span>
+                </div>
+                <p class="consumer-stat-label">Carbohydrates</p>
+                <div class="consumer-stat-number">
+                    {{ total_carbohydrates|default_if_none:0|floatformat:2 }}
+                    <span class="consumer-stat-unit">g</span>
+                </div>
+                <p class="consumer-stat-caption">Carbohydrates recorded today</p>
+                <div class="consumer-stat-bottom-line consumer-line-blue"></div>
+            </article>
+
+            <article class="consumer-stat-card">
+                <div class="consumer-stat-topline">
+                    <span class="consumer-stat-icon consumer-icon-rose" aria-hidden="true">F</span>
+                    <span class="consumer-stat-tag">TODAY</span>
+                </div>
+                <p class="consumer-stat-label">Fats</p>
+                <div class="consumer-stat-number">
+                    {{ total_fats|default_if_none:0|floatformat:2 }}
+                    <span class="consumer-stat-unit">g</span>
+                </div>
+                <p class="consumer-stat-caption">Fats recorded today</p>
+                <div class="consumer-stat-bottom-line consumer-line-rose"></div>
+            </article>
+
+            <article class="consumer-stat-card">
+                <div class="consumer-stat-topline">
+                    <span class="consumer-stat-icon consumer-icon-gold" aria-hidden="true">✓</span>
+                    <span class="consumer-stat-tag">ALL TIME</span>
+                </div>
+                <p class="consumer-stat-label">Meal entries</p>
+                <div class="consumer-stat-number">
+                    {{ total_entries|default_if_none:0 }}
+                </div>
+                <p class="consumer-stat-caption">Your recorded meal entries</p>
+                <div class="consumer-stat-bottom-line consumer-line-gold"></div>
+            </article>
+
+        </div>
+
+        <p class="consumer-stats-note">
+            <span aria-hidden="true">ⓘ</span>
+            Nutrition totals reflect the information recorded in your meal logs.
+            They are not a substitute for personalized medical advice.
+        </p>
+    </section>
+
+    <!-- Recent meals -->
+    <section class="consumer-panel" aria-labelledby="recent-meals-heading">
+        <div class="consumer-panel-header">
+            <div class="consumer-panel-title-group">
+                <div class="consumer-panel-icon consumer-panel-icon-green" aria-hidden="true">
+                    ♧
+                </div>
+                <div>
+                    <p class="consumer-eyebrow">YOUR FOOD JOURNAL</p>
+                    <h2 id="recent-meals-heading">Recent meals</h2>
+                    <p class="consumer-panel-description">
+                        Keep a record of your meals and their nutritional values.
+                    </p>
+                </div>
+            </div>
+
+            <a href="{% url 'meal_create' %}" class="consumer-outline-button">
+                <span aria-hidden="true">＋</span> Log a meal
+            </a>
+        </div>
+
+        {% if meals %}
+            <div class="consumer-table-wrap">
+                <table class="consumer-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Date</th>
+                            <th scope="col">Meal and food</th>
+                            <th scope="col">Calories</th>
+                            <th scope="col">Protein</th>
+                            <th scope="col">Carbs</th>
+                            <th scope="col">Fats</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for meal in meals %}
+                            <tr>
+                                <td class="consumer-date-cell">
+                                    {% if meal.meal_date %}
+                                        {{ meal.meal_date|date:"M d, Y" }}
+                                    {% else %}
+                                        {{ meal.logged_at|date:"M d, Y" }}
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    <div class="consumer-food-cell">
+                                        <span class="consumer-food-dot" aria-hidden="true"></span>
+                                        <div>
+                                            <strong>{{ meal.food_name|default:"Unnamed meal" }}</strong>
+                                            <span>
+                                                {{ meal.meal_type|default:"Meal" }}
+                                                {% if meal.details %}
+                                                    · {{ meal.details|truncatechars:55 }}
+                                                {% endif %}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td class="consumer-numeric-cell">
+                                    {{ meal.calories|default_if_none:0 }}
+                                    <span>kcal</span>
+                                </td>
+
+                                <td class="consumer-numeric-cell">
+                                    {{ meal.protein|default_if_none:0|floatformat:1 }} g
+                                </td>
+
+                                <td class="consumer-numeric-cell">
+                                    {{ meal.carbohydrates|default_if_none:0|floatformat:1 }} g
+                                </td>
+
+                                <td class="consumer-numeric-cell">
+                                    {{ meal.fats|default_if_none:0|floatformat:1 }} g
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="consumer-empty-state">
+                <div class="consumer-empty-illustration" aria-hidden="true">♧</div>
+                <h3>Your food journal starts here</h3>
+                <p>
+                    Your meals will appear here after you record your first entry.
+                    Start with whatever you've eaten most recently.
+                </p>
+                <a href="{% url 'meal_create' %}" class="consumer-primary-action">
+                    <span aria-hidden="true">＋</span> Log your first meal
+                </a>
+            </div>
+        {% endif %}
+    </section>
+
+    <!-- Consultations -->
+    <section class="consumer-panel" aria-labelledby="consultations-heading">
+        <div class="consumer-panel-header">
+            <div class="consumer-panel-title-group">
+                <div class="consumer-panel-icon consumer-panel-icon-lavender" aria-hidden="true">
+                    ♡
+                </div>
+                <div>
+                    <p class="consumer-eyebrow">PERSONALIZED CARE</p>
+                    <h2 id="consultations-heading">Your consultations</h2>
+                    <p class="consumer-panel-description">
+                        Follow your appointment status and stay connected with your dietitian.
+                    </p>
+                </div>
+            </div>
+
+            <a href="{% url 'appointment_create' %}" class="consumer-outline-button">
+                <span aria-hidden="true">＋</span> Book appointment
+            </a>
+        </div>
+
+        {% if appointments %}
+            <div class="consumer-appointments">
+                {% for appointment in appointments %}
+                    <article class="consumer-appointment-card">
+                        <div class="consumer-appointment-main">
+                            <div class="consumer-dietitian-avatar" aria-hidden="true">
+                                {{ appointment.dietitian.username|first|upper }}
+                            </div>
+
+                            <div class="consumer-appointment-details">
+                                <div class="consumer-appointment-title-row">
+                                    <h3>{{ appointment.dietitian.username }}</h3>
+                                    <span class="consumer-status status-{{ appointment.status }}">
+                                        <span class="consumer-status-dot" aria-hidden="true"></span>
+                                        {{ appointment.get_status_display }}
+                                    </span>
+                                </div>
+
+                                <p class="consumer-appointment-date">
+                                    <span aria-hidden="true">▦</span>
+                                    {{ appointment.scheduled_at|date:"M d, Y" }}
+                                    <span class="consumer-date-separator">·</span>
+                                    <span aria-hidden="true">◷</span>
+                                    {{ appointment.scheduled_at|date:"g:i A" }}
+                                </p>
+
+                                <p class="consumer-appointment-reason">
+                                    {{ appointment.reason|default:"General consultation"|truncatechars:100 }}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="consumer-appointment-actions">
+                            {% if appointment.status == "approved" %}
+                                <a href="{% url 'video_room' appointment.id %}"
+                                   class="consumer-action-button consumer-action-primary">
+                                    <span aria-hidden="true">▷</span>
+                                    Join consultation
+                                </a>
+
+                                <form method="post"
+                                      action="{% url 'appointment_cancel' appointment.id %}"
+                                      data-confirm="Are you sure you want to cancel this approved consultation?"
+                                      data-confirm-title="Cancel consultation?"
+                                      data-confirm-button="Yes, cancel"
+                                      data-confirm-variant="danger">
+                                    {% csrf_token %}
+                                    <button type="submit" class="consumer-action-button consumer-action-danger">
+                                        Cancel
+                                    </button>
+                                </form>
+
+                            {% elif appointment.status == "pending" %}
+                                <span class="consumer-action-hint">
+                                    <span aria-hidden="true">◷</span>
+                                    Awaiting dietitian approval
+                                </span>
+
+                                <form method="post"
+                                      action="{% url 'appointment_cancel' appointment.id %}"
+                                      data-confirm="Are you sure you want to cancel this consultation request?"
+                                      data-confirm-title="Cancel request?"
+                                      data-confirm-button="Yes, cancel"
+                                      data-confirm-variant="danger">
+                                    {% csrf_token %}
+                                    <button type="submit" class="consumer-action-button consumer-action-danger">
+                                        Cancel request
+                                    </button>
+                                </form>
+
+                            {% elif appointment.status == "completed" %}
+                                {% if appointment.consultation_note %}
+                                    <a href="{% url 'consumer_recommendations' appointment.id %}"
+                                       class="consumer-action-button consumer-action-primary">
+                                        View recommendations <span aria-hidden="true">→</span>
+                                    </a>
+                                {% else %}
+                                    <span class="consumer-action-hint">
+                                        Consultation completed
+                                    </span>
+                                {% endif %}
+
+                            {% elif appointment.status == "rejected" %}
+                                <span class="consumer-action-hint">
+                                    This request was declined.
+                                </span>
+
+                            {% elif appointment.status == "cancelled" %}
+                                <span class="consumer-action-hint">
+                                    This appointment was cancelled.
+                                </span>
+                            {% endif %}
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="consumer-empty-state">
+                <div class="consumer-empty-illustration consumer-empty-illustration-lavender" aria-hidden="true">
+                    ♡
+                </div>
+                <h3>Your next step starts with a conversation</h3>
+                <p>
+                    Book a consultation to discuss your nutrition goals
+                    with a dietitian.
+                </p>
+                <a href="{% url 'appointment_create' %}" class="consumer-primary-action">
+                    <span aria-hidden="true">＋</span> Book your first consultation
+                </a>
+            </div>
+        {% endif %}
+    </section>
+
+    <!-- Closing encouragement -->
+    <footer class="consumer-dashboard-footer">
+        <span class="consumer-footer-leaf" aria-hidden="true">❧</span>
+        <p>
+            <strong>Progress over perfection.</strong>
+            Build healthy habits at a pace that works for you.
+        </p>
+    </footer>
+
+</div>
+
+<style>
+    .consumer-dashboard {
+        --cd-green: #47795d;
+        --cd-green-dark: #365f48;
+        --cd-forest: #234635;
+        --cd-muted: #718075;
+        --cd-border: #e3eae0;
+        --cd-bg: #f7f9f5;
+
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 8px 0 32px;
+        color: var(--cd-forest);
+    }
+
+    .consumer-dashboard *,
+    .consumer-dashboard *::before,
+    .consumer-dashboard *::after {
+        box-sizing: border-box;
+    }
+
+    .consumer-dashboard a {
+        text-decoration: none;
+    }
+
+    /* Welcome banner */
+    .consumer-welcome {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        min-height: 255px;
+        overflow: hidden;
+        margin-bottom: 36px;
+        padding: 35px 38px;
+        border: 1px solid #dce8d9;
+        border-radius: 24px;
+        background: linear-gradient(112deg, #f1f7ed 0%, #f8faf5 58%, #e7f0e3 100%);
+    }
+
+    .consumer-welcome-content {
+        position: relative;
+        z-index: 2;
+        max-width: 650px;
+        min-width: 0;
+    }
+
+    .consumer-welcome-label {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        margin-bottom: 15px;
+        color: var(--cd-green);
+        font-size: 0.71rem;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+    }
+
+    .consumer-live-dot {
+        width: 8px;
+        height: 8px;
+        flex: 0 0 8px;
+        border-radius: 50%;
+        background: #75a87b;
+        box-shadow: 0 0 0 4px rgba(117, 168, 123, 0.13);
+    }
+
+    .consumer-welcome h1 {
+        margin: 0;
+        color: var(--cd-forest);
+        font-size: clamp(2rem, 4vw, 2.8rem);
+        font-weight: 780;
+        letter-spacing: -0.055em;
+        line-height: 1.15;
+    }
+
+    .consumer-title-period {
+        color: var(--cd-green);
+    }
+
+    .consumer-welcome-content > p {
+        max-width: 560px;
+        margin: 14px 0 0;
+        color: #66796a;
+        font-size: 0.97rem;
+        line-height: 1.8;
+    }
+
+    .consumer-welcome-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 11px;
+        margin-top: 23px;
+    }
+
+    .consumer-primary-action,
+    .consumer-secondary-action,
+    .consumer-outline-button {
+        display: inline-flex;
+        min-height: 44px;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        padding: 11px 17px;
+        border: 1px solid transparent;
+        border-radius: 11px;
+        font-family: inherit;
+        font-size: 0.88rem;
+        font-weight: 700;
+        line-height: 1.4;
+        text-align: center;
+        cursor: pointer;
+        transition: background-color 160ms ease, border-color 160ms ease,
+            box-shadow 160ms ease, transform 160ms ease;
+    }
+
+    .consumer-primary-action {
+        background: var(--cd-green);
+        color: #fff !important;
+        box-shadow: 0 4px 10px rgba(54, 95, 72, 0.13);
+    }
+
+    .consumer-primary-action:hover {
+        background: var(--cd-green-dark);
+        box-shadow: 0 6px 15px rgba(54, 95, 72, 0.2);
+        transform: translateY(-1px);
+    }
+
+    .consumer-secondary-action,
+    .consumer-outline-button {
+        border-color: #d7e3d4;
+        background: rgba(255, 255, 255, 0.75);
+        color: var(--cd-green-dark) !important;
+    }
+
+    .consumer-secondary-action:hover,
+    .consumer-outline-button:hover {
+        border-color: #b6cbb8;
+        background: #fff;
+    }
+
+    .consumer-welcome-art {
+        position: relative;
+        display: grid;
+        flex: 0 0 255px;
+        width: 255px;
+        height: 215px;
+        place-items: center;
+    }
+
+    .consumer-art-orbit {
+        position: absolute;
+        border: 1px solid rgba(71, 121, 93, 0.15);
+        border-radius: 50%;
+    }
+
+    .consumer-art-orbit-one {
+        width: 190px;
+        height: 190px;
+    }
+
+    .consumer-art-orbit-two {
+        width: 145px;
+        height: 145px;
+    }
+
+    .consumer-art-circle {
+        display: grid;
+        width: 116px;
+        height: 116px;
+        place-items: center;
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        border-radius: 37px;
+        background: linear-gradient(145deg, #fff, #e4efdf);
+        box-shadow: 0 14px 40px rgba(54, 95, 72, 0.12);
+        transform: rotate(-8deg);
+    }
+
+    .consumer-art-leaf {
+        color: var(--cd-green);
+        font-size: 5rem;
+        line-height: 1;
+        transform: rotate(8deg);
+    }
+
+    .consumer-art-chip {
+        position: absolute;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        padding: 10px 12px;
+        border: 1px solid rgba(223, 233, 218, 0.95);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.88);
+        box-shadow: 0 6px 18px rgba(45, 76, 51, 0.07);
+        color: #4d6954;
+        font-size: 0.74rem;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .consumer-art-chip span {
+        color: var(--cd-green);
+    }
+
+    .consumer-art-chip-top {
+        top: 15px;
+        right: 0;
+    }
+
+    .consumer-art-chip-bottom {
+        bottom: 15px;
+        left: 0;
+    }
+
+    /* Section headings */
+    .consumer-section {
+        margin-bottom: 37px;
+    }
+
+    .consumer-section-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        margin-bottom: 19px;
+    }
+
+    .consumer-eyebrow {
+        margin: 0 0 7px;
+        color: var(--cd-green);
+        font-size: 0.7rem;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        line-height: 1.5;
+    }
+
+    .consumer-section-heading h2,
+    .consumer-panel-header h2 {
+        margin: 0;
+        color: var(--cd-forest);
+        font-size: 1.42rem;
+        font-weight: 760;
+        letter-spacing: -0.035em;
+        line-height: 1.35;
+    }
+
+    .consumer-section-heading > div:first-child > p:last-child {
+        margin: 7px 0 0;
+        color: var(--cd-muted);
+        font-size: 0.88rem;
+        line-height: 1.6;
+    }
+
+    .consumer-heading-decoration {
+        color: #a6c3a1;
+        font-size: 2rem;
+    }
+
+    /* Nutrition statistics */
+    .consumer-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 15px;
+    }
+
+    .consumer-stat-card {
+        position: relative;
+        min-width: 0;
+        overflow: hidden;
+        padding: 20px;
+        border: 1px solid var(--cd-border);
+        border-radius: 17px;
+        background: #fff;
+        box-shadow: 0 5px 17px rgba(38, 66, 45, 0.025);
+        transition: border-color 160ms ease, box-shadow 160ms ease,
+            transform 160ms ease;
+    }
+
+    .consumer-stat-card:hover {
+        border-color: #cfdfcd;
+        box-shadow: 0 9px 24px rgba(38, 66, 45, 0.06);
+        transform: translateY(-2px);
+    }
+
+    .consumer-stat-highlight {
+        border-color: #d6e6d1;
+        background: linear-gradient(145deg, #f8fbf5, #fff);
+    }
+
+    .consumer-stat-topline {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 17px;
+    }
+
+    .consumer-stat-icon {
+        display: grid;
+        flex: 0 0 39px;
+        width: 39px;
+        height: 39px;
+        place-items: center;
+        border-radius: 12px;
+        font-size: 1.15rem;
+        font-weight: 800;
+    }
+
+    .consumer-icon-green {
+        background: #e5f0df;
+        color: #467650;
+    }
+
+    .consumer-icon-peach {
+        background: #fcebdd;
+        color: #b47747;
+    }
+
+    .consumer-icon-lavender {
+        background: #eee8fb;
+        color: #7961aa;
+    }
+
+    .consumer-icon-blue {
+        background: #e5effb;
+        color: #4c78a7;
+    }
+
+    .consumer-icon-rose {
+        background: #fbe9ec;
+        color: #b45e70;
+    }
+
+    .consumer-icon-gold {
+        background: #fbf1d7;
+        color: #a98430;
+    }
+
+    .consumer-stat-tag {
+        color: #93a095;
+        font-size: 0.61rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+    }
+
+    .consumer-stat-label {
+        margin: 0 0 8px;
+        color: #718075;
+        font-size: 0.84rem;
+        font-weight: 600;
+        line-height: 1.5;
+    }
+
+    .consumer-stat-number {
+        overflow-wrap: anywhere;
+        color: var(--cd-forest);
+        font-size: clamp(1.45rem, 2.6vw, 2rem);
+        font-weight: 780;
+        letter-spacing: -0.055em;
+        line-height: 1.25;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .consumer-stat-unit {
+        color: #7a8b7d;
+        font-size: 0.82rem;
+        font-weight: 600;
+        letter-spacing: 0;
+    }
+
+    .consumer-stat-caption {
+        margin: 8px 0 0;
+        color: #91a094;
+        font-size: 0.76rem;
+        line-height: 1.55;
+    }
+
+    .consumer-stat-bottom-line {
+        height: 3px;
+        margin-top: 17px;
+        border-radius: 3px;
+    }
+
+    .consumer-line-green { background: #b8d6b1; }
+    .consumer-line-peach { background: #f0c8a6; }
+    .consumer-line-lavender { background: #d0c1ef; }
+    .consumer-line-blue { background: #bfd6f2; }
+    .consumer-line-rose { background: #efc4cc; }
+    .consumer-line-gold { background: #ecdba8; }
+
+    .consumer-stats-note {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        margin: 14px 2px 0;
+        color: #859187;
+        font-size: 0.77rem;
+        line-height: 1.65;
+    }
+
+    .consumer-stats-note span {
+        flex-shrink: 0;
+        color: #7c9c7c;
+    }
+
+    /* Shared content panels */
+    .consumer-panel {
+        min-width: 0;
+        overflow: hidden;
+        margin-bottom: 27px;
+        border: 1px solid var(--cd-border);
+        border-radius: 21px;
+        background: #fff;
+        box-shadow: 0 7px 25px rgba(38, 66, 45, 0.035);
+    }
+
+    .consumer-panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        padding: 24px 26px;
+        border-bottom: 1px solid #edf1eb;
+    }
+
+    .consumer-panel-title-group {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        min-width: 0;
+    }
+
+    .consumer-panel-icon {
+        display: grid;
+        flex: 0 0 47px;
+        width: 47px;
+        height: 47px;
+        place-items: center;
+        border-radius: 15px;
+        font-size: 1.35rem;
+    }
+
+    .consumer-panel-icon-green {
+        background: #edf5e9;
+        color: var(--cd-green);
+    }
+
+    .consumer-panel-icon-lavender {
+        background: #f0ebfa;
+        color: #7964a5;
+    }
+
+    .consumer-panel-header h2 {
+        font-size: 1.24rem;
+    }
+
+    .consumer-panel-description {
+        margin: 6px 0 0;
+        color: var(--cd-muted);
+        font-size: 0.83rem;
+        line-height: 1.6;
+    }
+
+    .consumer-outline-button {
+        flex-shrink: 0;
+        min-height: 40px;
+        padding: 9px 13px;
+        font-size: 0.82rem;
+    }
+
+    /* Meals table */
+    .consumer-table-wrap {
+        width: 100%;
+        overflow-x: auto;
+        overscroll-behavior-x: contain;
+    }
+
+    .consumer-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+        font-size: 0.82rem;
+    }
+
+    .consumer-table thead {
+        background: #fafbf8;
+    }
+
+    .consumer-table th {
+        padding: 13px 17px;
+        border-bottom: 1px solid #e9eee7;
+        color: #718075;
+        font-size: 0.7rem;
+        font-weight: 800;
+        letter-spacing: 0.025em;
+        white-space: nowrap;
+    }
+
+    .consumer-table td {
+        padding: 16px 17px;
+        border-bottom: 1px solid #f0f3ee;
+        color: #536457;
+        vertical-align: middle;
+    }
+
+    .consumer-table tbody tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .consumer-table tbody tr {
+        transition: background-color 130ms ease;
+    }
+
+    .consumer-table tbody tr:hover {
+        background: #fbfcf9;
+    }
+
+    .consumer-date-cell {
+        min-width: 105px;
+        color: #6c7d70 !important;
+        white-space: nowrap;
+    }
+
+    .consumer-food-cell {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        min-width: 175px;
+    }
+
+    .consumer-food-dot {
+        flex: 0 0 9px;
+        width: 9px;
+        height: 9px;
+        margin-top: 6px;
+        border-radius: 50%;
+        background: #8eb78b;
+        box-shadow: 0 0 0 4px #edf5e9;
+    }
+
+    .consumer-food-cell > div {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        min-width: 0;
+    }
+
+    .consumer-food-cell strong {
+        color: #304d3a;
+        font-size: 0.85rem;
+        font-weight: 700;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+    }
+
+    .consumer-food-cell > div > span {
+        max-width: 250px;
+        color: #879287;
+        font-size: 0.75rem;
+        line-height: 1.6;
+        overflow-wrap: anywhere;
+    }
+
+    .consumer-numeric-cell {
+        white-space: nowrap;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .consumer-numeric-cell > span {
+        color: #91a094;
+        font-size: 0.72rem;
+    }
+
+    /* Appointment cards */
+    .consumer-appointments {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .consumer-appointment-card {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        padding: 21px 26px;
+        border-bottom: 1px solid #edf1eb;
+        transition: background-color 140ms ease;
+    }
+
+    .consumer-appointment-card:last-child {
+        border-bottom: 0;
+    }
+
+    .consumer-appointment-card:hover {
+        background: #fcfdfb;
+    }
+
+    .consumer-appointment-main {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        min-width: 0;
+    }
+
+    .consumer-dietitian-avatar {
+        display: grid;
+        flex: 0 0 46px;
+        width: 46px;
+        height: 46px;
+        place-items: center;
+        border: 1px solid #dce8d9;
+        border-radius: 15px;
+        background: linear-gradient(145deg, #edf5e9, #dfece0);
+        color: var(--cd-green-dark);
+        font-size: 1.1rem;
+        font-weight: 800;
+    }
+
+    .consumer-appointment-details {
+        min-width: 0;
+    }
+
+    .consumer-appointment-title-row {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .consumer-appointment-title-row h3 {
+        margin: 0;
+        color: var(--cd-forest);
+        font-size: 0.95rem;
+        font-weight: 750;
+        overflow-wrap: anywhere;
+    }
+
+    .consumer-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 9px;
+        border: 1px solid transparent;
+        border-radius: 999px;
+        font-size: 0.68rem;
+        font-weight: 750;
+        line-height: 1.35;
+        white-space: nowrap;
+    }
+
+    .consumer-status-dot {
+        width: 6px;
+        height: 6px;
+        flex: 0 0 6px;
+        border-radius: 50%;
+        background: currentColor;
+    }
+
+    .consumer-status.status-pending {
+        border-color: #f0dfb4;
+        background: #fff7e3;
+        color: #98702a;
+    }
+
+    .consumer-status.status-approved {
+        border-color: #cce5d0;
+        background: #edf8ee;
+        color: #39784a;
+    }
+
+    .consumer-status.status-completed {
+        border-color: #d8d3ef;
+        background: #f2effb;
+        color: #7160a1;
+    }
+
+    .consumer-status.status-rejected {
+        border-color: #f0d0cc;
+        background: #fff0ee;
+        color: #a64f45;
+    }
+
+    .consumer-status.status-cancelled {
+        border-color: #e2e6e0;
+        background: #f4f6f3;
+        color: #7b857c;
+    }
+
+    .consumer-appointment-date {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 7px;
+        margin: 9px 0 0;
+        color: #687a6b;
+        font-size: 0.8rem;
+        line-height: 1.6;
+    }
+
+    .consumer-appointment-date > span[aria-hidden="true"] {
+        color: #83a184;
+    }
+
+    .consumer-date-separator {
+        color: #b0bbb0;
+    }
+
+    .consumer-appointment-reason {
+        margin: 7px 0 0;
+        color: #879287;
+        font-size: 0.79rem;
+        line-height: 1.65;
+        overflow-wrap: anywhere;
+    }
+
+    .consumer-appointment-actions {
+        display: flex;
+        flex-shrink: 0;
+        align-items: center;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .consumer-appointment-actions form {
+        margin: 0;
+    }
+
+    .consumer-action-button {
+        display: inline-flex;
+        min-height: 37px;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        padding: 8px 12px;
+        border: 1px solid transparent;
+        border-radius: 10px;
+        font-family: inherit;
+        font-size: 0.77rem;
+        font-weight: 750;
+        line-height: 1.4;
+        text-align: center;
+        cursor: pointer;
+        transition: background-color 140ms ease, border-color 140ms ease,
+            box-shadow 140ms ease;
+    }
+
+    .consumer-action-primary {
+        border-color: #d5e5d2;
+        background: #edf5e9;
+        color: var(--cd-green-dark) !important;
+    }
+
+    .consumer-action-primary:hover {
+        border-color: #b7d0b6;
+        background: #e1eedc;
+    }
+
+    .consumer-action-danger {
+        border-color: #f0d6d2;
+        background: #fff;
+        color: #a64f45;
+    }
+
+    .consumer-action-danger:hover {
+        border-color: #e4b9b3;
+        background: #fff2f0;
+    }
+
+    .consumer-action-hint {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: #849086;
+        font-size: 0.76rem;
+        line-height: 1.6;
+    }
+
+    /* Empty states */
+    .consumer-empty-state {
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        padding: 40px 24px 43px;
+        text-align: center;
+    }
+
+    .consumer-empty-illustration {
+        display: grid;
+        width: 66px;
+        height: 66px;
+        place-items: center;
+        margin-bottom: 18px;
+        border: 1px solid #dce8d9;
+        border-radius: 22px;
+        background: #f0f6ed;
+        color: var(--cd-green);
+        font-size: 2rem;
+    }
+
+    .consumer-empty-illustration-lavender {
+        border-color: #e4dcf4;
+        background: #f4f0fc;
+        color: #7964a5;
+    }
+
+    .consumer-empty-state h3 {
+        margin: 0;
+        color: var(--cd-forest);
+        font-size: 1.06rem;
+        font-weight: 750;
+        line-height: 1.5;
+    }
+
+    .consumer-empty-state > p {
+        max-width: 430px;
+        margin: 9px 0 19px;
+        color: var(--cd-muted);
+        font-size: 0.87rem;
+        line-height: 1.8;
+    }
+
+    /* Footer */
+    .consumer-dashboard-footer {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 15px 10px 4px;
+        color: #839084;
+        text-align: center;
+    }
+
+    .consumer-footer-leaf {
+        color: #79a07a;
+        font-size: 1.65rem;
+    }
+
+    .consumer-dashboard-footer p {
+        margin: 0;
+        font-size: 0.84rem;
+        line-height: 1.7;
+    }
+
+    .consumer-dashboard-footer strong {
+        color: #4f7056;
+    }
+
+    /* Keyboard accessibility */
+    .consumer-dashboard a:focus-visible,
+    .consumer-dashboard button:focus-visible {
+        outline: 3px solid rgba(71, 121, 93, 0.3);
+        outline-offset: 3px;
+    }
+
+    /* Responsive layouts */
+    @media (max-width: 950px) {
+        .consumer-welcome {
+            padding: 29px;
+        }
+
+        .consumer-welcome-art {
+            flex-basis: 200px;
+            width: 200px;
+            transform: scale(0.88);
+            transform-origin: center right;
+        }
+
+        .consumer-stats-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .consumer-appointment-card {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .consumer-appointment-actions {
+            justify-content: flex-start;
+            padding-left: 60px;
+        }
+    }
+
+    @media (max-width: 650px) {
+        .consumer-dashboard {
+            padding-top: 3px;
+        }
+
+        .consumer-welcome {
+            min-height: 0;
+            padding: 25px 21px;
+            border-radius: 19px;
+        }
+
+        .consumer-welcome-content {
+            max-width: none;
+        }
+
+        .consumer-welcome h1 {
+            font-size: clamp(1.85rem, 8vw, 2.35rem);
+        }
+
+        .consumer-welcome-content > p {
+            font-size: 0.9rem;
+        }
+
+        .consumer-welcome-art {
+            display: none;
+        }
+
+        .consumer-welcome-actions {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .consumer-welcome-actions .consumer-primary-action,
+        .consumer-welcome-actions .consumer-secondary-action {
+            width: 100%;
+        }
+
+        .consumer-section {
+            margin-bottom: 29px;
+        }
+
+        .consumer-section-heading h2 {
+            font-size: 1.28rem;
+        }
+
+        .consumer-stats-grid {
+            gap: 11px;
+        }
+
+        .consumer-stat-card {
+            padding: 15px;
+            border-radius: 14px;
+        }
+
+        .consumer-stat-icon {
+            flex-basis: 34px;
+            width: 34px;
+            height: 34px;
+            border-radius: 11px;
+        }
+
+        .consumer-stat-topline {
+            margin-bottom: 13px;
+        }
+
+        .consumer-stat-number {
+            font-size: clamp(1.35rem, 6vw, 1.8rem);
+        }
+
+        .consumer-stat-tag {
+            font-size: 0.56rem;
+        }
+
+        .consumer-stat-caption {
+            font-size: 0.71rem;
+        }
+
+        .consumer-panel {
+            margin-bottom: 20px;
+            border-radius: 17px;
+        }
+
+        .consumer-panel-header {
+            align-items: flex-start;
+            flex-direction: column;
+            padding: 20px 17px;
+        }
+
+        .consumer-panel-title-group {
+            align-items: flex-start;
+            gap: 11px;
+        }
+
+        .consumer-panel-icon {
+            flex-basis: 40px;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+        }
+
+        .consumer-panel-header h2 {
+            font-size: 1.13rem;
+        }
+
+        .consumer-panel-description {
+            font-size: 0.79rem;
+        }
+
+        .consumer-outline-button {
+            width: 100%;
+        }
+
+        .consumer-table {
+            min-width: 700px;
+        }
+
+        .consumer-table th,
+        .consumer-table td {
+            padding: 13px 14px;
+        }
+
+        .consumer-appointment-card {
+            padding: 19px 16px;
+        }
+
+        .consumer-appointment-main {
+            gap: 11px;
+        }
+
+        .consumer-dietitian-avatar {
+            flex-basis: 40px;
+            width: 40px;
+            height: 40px;
+            border-radius: 13px;
+        }
+
+        .consumer-appointment-title-row {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .consumer-appointment-actions {
+            width: 100%;
+            padding-left: 0;
+        }
+
+        .consumer-appointment-actions form {
+            display: flex;
+        }
+
+        .consumer-action-button {
+            min-height: 40px;
+        }
+
+        .consumer-empty-state {
+            padding: 32px 18px;
+        }
+
+        .consumer-dashboard-footer {
+            align-items: flex-start;
+            padding-top: 8px;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .consumer-dashboard *,
+        .consumer-dashboard *::before,
+        .consumer-dashboard *::after {
+            transition-duration: 0.01ms !important;
+        }
+    }
+</style>
+{% endblock %}

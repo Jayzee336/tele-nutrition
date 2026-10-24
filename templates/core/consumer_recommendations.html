@@ -1,0 +1,251 @@
+{% extends "base.html" %}
+
+{% block title %}Nutrition Recommendations | NutriConnect{% endblock %}
+
+{% block content %}
+<div class="page-container recommendations-page">
+
+    <header class="page-header">
+        <div>
+            <p class="eyebrow">YOUR PERSONALIZED CARE</p>
+            <h1>Nutrition recommendations</h1>
+            <p class="page-subtitle">
+                Review the guidance your dietitian shared after your consultation.
+            </p>
+        </div>
+
+        <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+            ← Back to dashboard
+        </a>
+    </header>
+
+    <section class="card recommendation-summary">
+        <div class="recommendation-summary-icon" aria-hidden="true">✓</div>
+        <div>
+            <p class="eyebrow">CONSULTATION COMPLETED</p>
+            <h2>Your nutrition guidance</h2>
+            <p class="muted">
+                Your recommendations are available to revisit whenever you
+                need a reminder of your next steps.
+            </p>
+        </div>
+    </section>
+
+    <section class="card recommendation-details">
+        <div class="section-header">
+            <div>
+                <p class="eyebrow">CONSULTATION DETAILS</p>
+                <h2>Your appointment</h2>
+            </div>
+
+            <span class="status-badge status-completed">Completed</span>
+        </div>
+
+        <div class="recommendation-meta">
+            <div class="recommendation-meta-item">
+                <span class="recommendation-meta-label">Dietitian</span>
+                <strong>{{ appointment.dietitian.username }}</strong>
+            </div>
+
+            <div class="recommendation-meta-item">
+                <span class="recommendation-meta-label">Date and time</span>
+                <strong>
+                    {{ appointment.scheduled_at|date:"M d, Y" }}
+                    at {{ appointment.scheduled_at|date:"g:i A" }}
+                </strong>
+            </div>
+
+            {% if appointment.reason %}
+                <div class="recommendation-meta-item">
+                    <span class="recommendation-meta-label">Consultation reason</span>
+                    <strong>{{ appointment.reason }}</strong>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <section class="card recommendation-content">
+        <div class="section-header">
+            <div>
+                <p class="eyebrow">YOUR DIETITIAN'S ADVICE</p>
+                <h2>Recommendations and next steps</h2>
+            </div>
+        </div>
+
+        {% if recommendations %}
+            <div class="recommendation-text">
+                {{ recommendations|linebreaks }}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon" aria-hidden="true">♡</div>
+                <h3>No recommendations have been added yet</h3>
+                <p>
+                    Your dietitian has not added any recommendations for this
+                    consultation. Please check again later.
+                </p>
+            </div>
+        {% endif %}
+    </section>
+
+    <div class="recommendations-footer">
+        <p>
+            <strong>A reminder:</strong> These recommendations are intended
+            to support your nutrition journey. Contact your dietitian if you
+            have questions or need guidance tailored to your individual needs.
+        </p>
+
+        <a href="{% url 'dashboard' %}" class="btn btn-primary">
+            Return to dashboard
+        </a>
+    </div>
+
+</div>
+
+<style>
+    .recommendations-page {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    .recommendation-summary {
+        display: flex;
+        align-items: flex-start;
+        gap: 18px;
+        padding: 26px;
+        border: 1px solid #dce8da;
+        background: linear-gradient(135deg, #f0f6ed, #ffffff);
+    }
+
+    .recommendation-summary-icon {
+        display: grid;
+        flex-shrink: 0;
+        place-items: center;
+        width: 48px;
+        height: 48px;
+        border-radius: 15px;
+        background: #dcebdd;
+        color: #365f48;
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+
+    .recommendation-summary h2,
+    .recommendation-details h2,
+    .recommendation-content h2 {
+        margin: 0 0 8px;
+        color: #234635;
+    }
+
+    .recommendation-summary .eyebrow,
+    .recommendation-details .eyebrow,
+    .recommendation-content .eyebrow {
+        margin: 0 0 8px;
+        color: #47795d;
+        font-size: 0.75rem;
+        font-weight: 750;
+        letter-spacing: 0.09em;
+    }
+
+    .recommendation-summary p:last-child {
+        margin-bottom: 0;
+        line-height: 1.7;
+    }
+
+    .recommendation-details,
+    .recommendation-content {
+        padding: 26px;
+    }
+
+    .recommendation-meta {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+        margin-top: 20px;
+    }
+
+    .recommendation-meta-item {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+        min-width: 0;
+        padding: 15px;
+        border: 1px solid #e5ebe2;
+        border-radius: 12px;
+        background: #fafbf8;
+    }
+
+    .recommendation-meta-label {
+        color: #647568;
+        font-size: 0.82rem;
+    }
+
+    .recommendation-meta-item strong {
+        color: #234635;
+        overflow-wrap: anywhere;
+        line-height: 1.6;
+    }
+
+    .recommendation-text {
+        margin-top: 20px;
+        color: #35483b;
+        font-size: 1rem;
+        line-height: 1.9;
+        overflow-wrap: anywhere;
+    }
+
+    .recommendation-text p {
+        margin: 0 0 18px;
+    }
+
+    .recommendation-text p:last-child {
+        margin-bottom: 0;
+    }
+
+    .recommendations-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        padding: 20px 4px;
+    }
+
+    .recommendations-footer p {
+        max-width: 680px;
+        margin: 0;
+        color: #647568;
+        font-size: 0.9rem;
+        line-height: 1.8;
+    }
+
+    .recommendations-footer strong {
+        color: #365f48;
+    }
+
+    @media (max-width: 640px) {
+        .recommendation-summary,
+        .recommendation-details,
+        .recommendation-content {
+            padding: 20px;
+        }
+
+        .recommendation-meta {
+            grid-template-columns: 1fr;
+        }
+
+        .recommendations-footer {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .recommendations-footer .btn {
+            align-self: flex-start;
+        }
+
+        .recommendation-summary {
+            gap: 12px;
+        }
+    }
+</style>
+{% endblock %}

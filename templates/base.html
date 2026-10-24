@@ -1,0 +1,1124 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#f7f8f3">
+    <meta name="description" content="NutriConnect connects people with nutrition professionals for personalized nutrition guidance and wellness support.">
+
+    <title>{% block title %}NutriConnect | Nutrition & Wellness{% endblock %}</title>
+
+    <link rel="stylesheet" href="{% static 'css/nutriconnect.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    {% block extra_head %}{% endblock %}
+
+    <style>
+        :root {
+            --nc-forest: #234635;
+            --nc-green: #47795d;
+            --nc-green-hover: #365f48;
+            --nc-green-soft: #eaf2e9;
+            --nc-cream: #f7f8f3;
+            --nc-white: #ffffff;
+            --nc-text: #35483a;
+            --nc-muted: #788378;
+            --nc-border: #e5ebe2;
+            --nc-shadow: 0 8px 30px rgba(35, 70, 53, .055);
+            --nc-shadow-lg: 0 24px 80px rgba(22, 43, 30, .2);
+        }
+
+        html {
+            min-height: 100%;
+            scroll-behavior: smooth;
+            scroll-padding-top: 100px;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            background: var(--nc-cream);
+            color: var(--nc-text);
+            font-family: "DM Sans", sans-serif;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+        }
+
+        body, button, input, select, textarea {
+            font-family: "DM Sans", sans-serif;
+        }
+
+        h1, h2, h3, h4, .app-brand-name {
+            font-family: "Manrope", sans-serif;
+        }
+
+        .skip-link {
+            position: fixed;
+            z-index: 10000;
+            top: 10px;
+            left: 10px;
+            padding: 12px 16px;
+            transform: translateY(-150%);
+            border-radius: 10px;
+            background: var(--nc-forest);
+            color: #fff;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .skip-link:focus {
+            transform: translateY(0);
+        }
+
+        /* Navigation */
+
+        .app-header {
+            position: sticky;
+            z-index: 100;
+            top: 0;
+            width: 100%;
+            border-bottom: 1px solid rgba(220, 229, 216, .9);
+            background: rgba(255, 255, 255, .94);
+            box-shadow: 0 3px 18px rgba(35, 70, 53, .035);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+        }
+
+        .app-nav {
+            width: min(100% - 48px, 1440px);
+            min-height: 78px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+        }
+
+        .app-brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+            color: var(--nc-forest);
+            text-decoration: none;
+        }
+
+        .app-brand-mark {
+            display: grid;
+            width: 46px;
+            height: 46px;
+            flex: 0 0 46px;
+            place-items: center;
+            border: 1px solid #e0ebdc;
+            border-radius: 15px;
+            background: linear-gradient(145deg, #f0f6ed, #e4eee0);
+            color: var(--nc-green);
+            transition: transform 180ms ease;
+        }
+
+        .app-brand:hover .app-brand-mark {
+            transform: rotate(-4deg);
+        }
+
+        .app-brand-mark svg {
+            width: 37px;
+            height: 37px;
+        }
+
+        .app-brand-copy {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .app-brand-name {
+            font-size: 1.2rem;
+            font-weight: 800;
+            letter-spacing: -.055em;
+            white-space: nowrap;
+        }
+
+        .brand-period {
+            color: #83a879;
+        }
+
+        .app-brand-caption {
+            color: var(--nc-muted);
+            font-size: .68rem;
+            font-weight: 600;
+            letter-spacing: .035em;
+        }
+
+        .app-nav-right {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 14px;
+        }
+
+        .app-nav-divider {
+            width: 1px;
+            height: 34px;
+            background: var(--nc-border);
+        }
+
+        .app-user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        .app-user-avatar {
+            display: grid;
+            width: 39px;
+            height: 39px;
+            flex: 0 0 39px;
+            place-items: center;
+            border: 1px solid #dce8d8;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #edf5e9, #dcebd6);
+            color: var(--nc-forest);
+            font-family: "Manrope", sans-serif;
+            font-size: .95rem;
+            font-weight: 800;
+        }
+
+        .app-user-copy {
+            display: flex;
+            min-width: 0;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .app-user-greeting {
+            color: var(--nc-muted);
+            font-size: .68rem;
+        }
+
+        .app-user-name {
+            max-width: 190px;
+            overflow: hidden;
+            color: var(--nc-forest);
+            font-size: .84rem;
+            font-weight: 750;
+            text-overflow: ellipsis;
+        }
+
+        .app-logout-form {
+            margin: 0;
+        }
+
+        .app-logout-button,
+        .app-nav-link,
+        .app-nav-cta {
+            position: relative;
+            display: inline-flex;
+            min-height: 44px;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            padding: 0 19px;
+            border: 1px solid transparent;
+            border-radius: 13px;
+            font-family: "DM Sans", sans-serif;
+            font-size: .86rem;
+            font-weight: 750;
+            letter-spacing: -.01em;
+            text-decoration: none;
+            white-space: nowrap;
+            cursor: pointer;
+            transition:
+                background 180ms ease,
+                color 180ms ease,
+                border-color 180ms ease,
+                box-shadow 180ms ease,
+                transform 180ms ease;
+        }
+
+        .app-logout-button svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .app-logout-button {
+            padding: 0 14px;
+            background: transparent;
+            color: #586a5b;
+        }
+
+        .app-logout-button:hover {
+            border-color: var(--nc-border);
+            background: #f4f7f1;
+            color: var(--nc-forest);
+        }
+
+        /* Secondary action: Sign in */
+
+        .app-nav-link {
+            border-color: #dce6d9;
+            background: #fff;
+            color: #365641;
+            box-shadow: 0 2px 5px rgba(35, 70, 53, .025);
+        }
+
+        .app-nav-link:hover {
+            transform: translateY(-1px);
+            border-color: #bcd1b8;
+            background: #f0f6ed;
+            color: #234635;
+            box-shadow: 0 5px 13px rgba(35, 70, 53, .075);
+        }
+
+        /* Primary action: Create account */
+
+        .app-nav-cta {
+            padding-right: 15px;
+            padding-left: 20px;
+            border-color: #47795d;
+            background: linear-gradient(135deg, #528464 0%, #3d6d50 100%);
+            color: #fff;
+            box-shadow:
+                0 4px 10px rgba(54, 95, 72, .16),
+                inset 0 1px 0 rgba(255, 255, 255, .13);
+        }
+
+        .app-nav-cta:hover {
+            transform: translateY(-2px);
+            border-color: #2e583e;
+            background: linear-gradient(135deg, #47795d 0%, #2f5d41 100%);
+            color: #fff;
+            box-shadow: 0 7px 17px rgba(54, 95, 72, .22);
+        }
+
+        .app-nav-cta span {
+            display: inline-grid;
+            width: 22px;
+            height: 22px;
+            place-items: center;
+            border: 1px solid rgba(255, 255, 255, .25);
+            border-radius: 7px;
+            background: rgba(255, 255, 255, .12);
+            font-size: .9rem;
+            transition: transform 180ms ease;
+        }
+
+        .app-nav-cta:hover span {
+            transform: translate(2px, -2px);
+        }
+
+        .app-nav-link:focus-visible,
+        .app-nav-cta:focus-visible,
+        .app-logout-button:focus-visible {
+            outline: 3px solid rgba(71, 121, 93, .4);
+            outline-offset: 4px;
+        }
+
+        .app-nav-link:active,
+        .app-nav-cta:active,
+        .app-logout-button:active {
+            transform: translateY(0) scale(.98);
+        }
+
+        /* Main content and notifications */
+
+        .app-main {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            flex: 1;
+        }
+
+        .app-messages {
+            display: grid;
+            width: min(100% - 48px, 1440px);
+            gap: 10px;
+            margin: 22px auto 0;
+        }
+
+        .app-message {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 14px 17px;
+            border: 1px solid var(--nc-border);
+            border-radius: 13px;
+            background: #fff;
+            box-shadow: var(--nc-shadow);
+            animation: nc-message-in 240ms ease-out both;
+        }
+
+        .app-message p {
+            margin: 2px 0 0;
+            color: #455849;
+            font-size: .88rem;
+            line-height: 1.6;
+        }
+
+        .app-message-icon {
+            display: grid;
+            width: 25px;
+            height: 25px;
+            flex: 0 0 25px;
+            place-items: center;
+            border-radius: 50%;
+            background: #eaf2e9;
+            color: var(--nc-green);
+            font-size: .8rem;
+            font-weight: 800;
+        }
+
+        .app-message-success {
+            border-color: #d5e8d2;
+            background: #fbfef9;
+        }
+
+        .app-message-success .app-message-icon {
+            background: #e2f2df;
+            color: #347044;
+        }
+
+        .app-message-error {
+            border-color: #f0d5d1;
+            background: #fffaf9;
+        }
+
+        .app-message-error .app-message-icon {
+            background: #fde8e5;
+            color: #a54138;
+        }
+
+        .app-message-warning {
+            border-color: #f0e3bf;
+            background: #fffdf7;
+        }
+
+        .app-message-warning .app-message-icon {
+            background: #fbf0cf;
+            color: #87651b;
+        }
+
+        /* Footer */
+
+        .app-footer {
+            margin-top: 60px;
+            padding: 27px 24px 20px;
+            border-top: 1px solid #e5ebe2;
+            background: rgba(255, 255, 255, .72);
+        }
+
+        .app-footer-inner {
+            display: flex;
+            width: min(100%, 1440px);
+            align-items: center;
+            justify-content: space-between;
+            gap: 22px;
+            margin: 0 auto;
+        }
+
+        .app-footer-brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            color: var(--nc-forest);
+            font-family: "Manrope", sans-serif;
+            font-size: .87rem;
+            font-weight: 800;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .app-footer-mark {
+            display: grid;
+            width: 29px;
+            height: 29px;
+            place-items: center;
+            border-radius: 9px;
+            background: var(--nc-green-soft);
+            color: var(--nc-green);
+            font-size: .8rem;
+        }
+
+        .app-footer-message {
+            margin: 0;
+            color: #7a867b;
+            font-size: .79rem;
+            text-align: center;
+        }
+
+        .app-footer-copyright {
+            color: #7a867b;
+            font-size: .77rem;
+            white-space: nowrap;
+        }
+
+        .app-footer-disclaimer {
+            margin: 17px auto 0;
+            color: #98a096;
+            font-size: .72rem;
+            line-height: 1.6;
+            text-align: center;
+        }
+
+        /* Confirmation modal */
+
+        .nc-modal[hidden] {
+            display: none !important;
+        }
+
+        .nc-modal {
+            position: fixed;
+            z-index: 2000;
+            inset: 0;
+            display: grid;
+            overflow-y: auto;
+            padding: 24px;
+            place-items: center;
+        }
+
+        .nc-modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(20, 39, 27, .48);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            animation: nc-fade-in 160ms ease-out;
+        }
+
+        .nc-modal-dialog {
+            position: relative;
+            z-index: 1;
+            width: min(100%, 450px);
+            padding: 34px;
+            border: 1px solid rgba(255, 255, 255, .8);
+            border-radius: 24px;
+            background: #fff;
+            box-shadow: var(--nc-shadow-lg);
+            animation: nc-modal-in 220ms cubic-bezier(.2, .8, .2, 1) both;
+            outline: none;
+        }
+
+        .nc-modal-close {
+            position: absolute;
+            top: 17px;
+            right: 17px;
+            display: grid;
+            width: 36px;
+            height: 36px;
+            place-items: center;
+            border: 1px solid #e8ece6;
+            border-radius: 11px;
+            background: #fafbf9;
+            color: #718071;
+            cursor: pointer;
+            transition: background 160ms ease, color 160ms ease;
+        }
+
+        .nc-modal-close:hover {
+            background: #edf3e9;
+            color: var(--nc-forest);
+        }
+
+        .nc-modal-close svg {
+            width: 17px;
+            height: 17px;
+        }
+
+        .nc-modal-symbol {
+            display: grid;
+            width: 57px;
+            height: 57px;
+            margin-bottom: 21px;
+            place-items: center;
+            border: 1px solid #dce9d7;
+            border-radius: 18px;
+            background: linear-gradient(145deg, #eff6eb, #e3efdf);
+            color: var(--nc-green);
+        }
+
+        .nc-modal-symbol svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        .nc-modal-eyebrow {
+            color: var(--nc-green);
+            font-size: .7rem;
+            font-weight: 800;
+            letter-spacing: .11em;
+            text-transform: uppercase;
+        }
+
+        .nc-modal-title {
+            margin: 9px 0 10px;
+            color: var(--nc-forest);
+            font-size: 1.65rem;
+            font-weight: 800;
+            letter-spacing: -.05em;
+            line-height: 1.25;
+        }
+
+        .nc-modal-description {
+            margin: 0;
+            color: #738074;
+            font-size: .92rem;
+            line-height: 1.75;
+            white-space: pre-line;
+        }
+
+        .nc-modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 28px;
+        }
+
+        .nc-modal-button {
+            display: inline-flex;
+            min-height: 46px;
+            flex: 1;
+            align-items: center;
+            justify-content: center;
+            padding: 0 17px;
+            border: 1px solid transparent;
+            border-radius: 12px;
+            font-size: .85rem;
+            font-weight: 750;
+            cursor: pointer;
+            transition: background 160ms ease, transform 160ms ease;
+        }
+
+        .nc-modal-button:hover {
+            transform: translateY(-1px);
+        }
+
+        .nc-modal-button:focus-visible,
+        .nc-modal-close:focus-visible {
+            outline: 3px solid rgba(71, 121, 93, .4);
+            outline-offset: 3px;
+        }
+
+        .nc-modal-button-secondary {
+            border-color: #e1e8de;
+            background: #fff;
+            color: #536755;
+        }
+
+        .nc-modal-button-secondary:hover {
+            background: #f5f8f2;
+        }
+
+        .nc-modal-button-primary {
+            background: var(--nc-green);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(71, 121, 93, .17);
+        }
+
+        .nc-modal-button-primary:hover {
+            background: var(--nc-green-hover);
+        }
+
+        .nc-modal-button-danger {
+            background: #a84940;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(168, 73, 64, .15);
+        }
+
+        .nc-modal-button-danger:hover {
+            background: #893a33;
+        }
+
+        .nc-modal-symbol-danger {
+            border-color: #f0d8d4;
+            background: #fff0ed;
+            color: #a84940;
+        }
+
+        .nc-modal-symbol-success {
+            border-color: #d5e8d2;
+            background: #edf7e9;
+            color: #347044;
+        }
+
+        .nc-modal-footnote {
+            margin: 17px 0 0;
+            color: #98a096;
+            font-size: .72rem;
+            line-height: 1.5;
+            text-align: center;
+        }
+
+        /* Animations */
+
+        @keyframes nc-fade-in {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes nc-modal-in {
+            from { opacity: 0; transform: translateY(12px) scale(.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @keyframes nc-message-in {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive navigation and footer */
+
+        @media (max-width: 760px) {
+            .app-nav {
+                width: calc(100% - 28px);
+                min-height: 70px;
+                gap: 12px;
+            }
+
+            .app-brand {
+                gap: 9px;
+            }
+
+            .app-brand-mark {
+                width: 40px;
+                height: 40px;
+                flex-basis: 40px;
+                border-radius: 12px;
+            }
+
+            .app-brand-mark svg {
+                width: 33px;
+                height: 33px;
+            }
+
+            .app-brand-name {
+                font-size: 1.04rem;
+            }
+
+            .app-brand-caption {
+                font-size: .61rem;
+            }
+
+            .app-nav-right {
+                gap: 9px;
+            }
+
+            .app-user-copy,
+            .app-nav-divider {
+                display: none;
+            }
+
+            .app-user-avatar {
+                width: 35px;
+                height: 35px;
+                flex-basis: 35px;
+            }
+
+            .app-logout-button {
+                width: 39px;
+                min-height: 39px;
+                padding: 0;
+            }
+
+            .app-logout-button span {
+                display: none;
+            }
+
+            .app-nav-link,
+            .app-nav-cta {
+                min-height: 40px;
+                padding: 0 13px;
+                border-radius: 11px;
+                font-size: .78rem;
+            }
+
+            .app-nav-cta {
+                padding-right: 10px;
+                padding-left: 13px;
+            }
+
+            .app-nav-cta span {
+                width: 19px;
+                height: 19px;
+            }
+
+            .app-messages {
+                width: calc(100% - 28px);
+            }
+
+            .app-footer-inner {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 13px 20px;
+            }
+
+            .app-footer-message {
+                width: 100%;
+                order: 3;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .app-brand-caption {
+                display: none;
+            }
+
+            .app-brand-name {
+                font-size: .94rem;
+            }
+
+            .app-brand-mark {
+                width: 35px;
+                height: 35px;
+                flex-basis: 35px;
+            }
+
+            .app-brand-mark svg {
+                width: 30px;
+                height: 30px;
+            }
+
+            .app-nav {
+                width: calc(100% - 20px);
+                gap: 6px;
+            }
+
+            .app-nav-right {
+                gap: 6px;
+            }
+
+            .app-nav-link,
+            .app-nav-cta {
+                min-height: 37px;
+                padding: 0 10px;
+                font-size: .74rem;
+            }
+
+            .app-nav-cta {
+                gap: 5px;
+            }
+
+            .app-nav-cta span {
+                width: 17px;
+                height: 17px;
+                font-size: .75rem;
+            }
+
+            .nc-modal {
+                padding: 14px;
+            }
+
+            .nc-modal-dialog {
+                padding: 27px 21px 23px;
+                border-radius: 20px;
+            }
+
+            .nc-modal-title {
+                font-size: 1.45rem;
+            }
+
+            .nc-modal-actions {
+                flex-direction: column-reverse;
+            }
+
+            .nc-modal-button {
+                width: 100%;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html {
+                scroll-behavior: auto;
+            }
+
+            *,
+            *::before,
+            *::after {
+                animation-duration: .01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: .01ms !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+
+    <header class="app-header">
+        <nav class="app-nav" aria-label="Main navigation">
+            <a class="app-brand" href="{% url 'dashboard' %}" aria-label="NutriConnect home">
+                <span class="app-brand-mark" aria-hidden="true">
+                    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="40" height="40" rx="13" fill="currentColor" opacity=".12"/>
+                        <path d="M20 29V13" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                        <path d="M20 20C12 20 10 15 10 11C16 11 20 14 20 20Z" fill="currentColor"/>
+                        <path d="M20 17C20 10 25 8 30 9C30 15 26 19 20 20" fill="currentColor" opacity=".78"/>
+                        <path d="M13 29H27" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                    </svg>
+                </span>
+
+                <span class="app-brand-copy">
+                    <span class="app-brand-name">NutriConnect<span class="brand-period">.</span></span>
+                    <span class="app-brand-caption">Nutrition &amp; wellness</span>
+                </span>
+            </a>
+
+            <div class="app-nav-right">
+                {% if user.is_authenticated %}
+                    <div class="app-nav-divider" aria-hidden="true"></div>
+
+                    <div class="app-user">
+                        <span class="app-user-avatar" aria-hidden="true">
+                            {{ user.username|first|upper }}
+                        </span>
+                        <span class="app-user-copy">
+                            <span class="app-user-greeting">Signed in as</span>
+                            <span class="app-user-name">{{ user.username }}</span>
+                        </span>
+                    </div>
+
+                    <form method="post" action="{% url 'logout' %}" class="app-logout-form">
+                        {% csrf_token %}
+                        <button type="submit" class="app-logout-button" aria-label="Sign out of NutriConnect">
+                            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                <path d="M10 17L15 12L10 7M15 12H3M12 3H19C20.1 3 21 3.9 21 5V19C21 20.1 20.1 21 19 21H12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <span>Sign out</span>
+                        </button>
+                    </form>
+                {% else %}
+                    <a class="app-nav-link" href="{% url 'login' %}">
+                        Sign in
+                    </a>
+
+                    <a class="app-nav-cta" href="{% url 'register' %}">
+                        Create account
+                        <span aria-hidden="true">↗</span>
+                    </a>
+                {% endif %}
+            </div>
+        </nav>
+    </header>
+
+    <main id="main-content" class="app-main">
+        {% if messages %}
+            <div class="app-messages" aria-label="Notifications">
+                {% for message in messages %}
+                    <div class="app-message app-message-{{ message.tags|default:'info' }}"
+                         role="{% if message.tags == 'error' %}alert{% else %}status{% endif %}">
+                        <span class="app-message-icon" aria-hidden="true">
+                            {% if message.tags == 'success' %}✓
+                            {% elif message.tags == 'error' %}!
+                            {% elif message.tags == 'warning' %}⚠
+                            {% else %}i{% endif %}
+                        </span>
+                        <p>{{ message }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="app-footer">
+        <div class="app-footer-inner">
+            <a class="app-footer-brand" href="{% url 'dashboard' %}">
+                <span class="app-footer-mark" aria-hidden="true">N</span>
+                <span>NutriConnect</span>
+            </a>
+
+            <p class="app-footer-message">
+                Small steps. Better nourishment. Healthier living.
+            </p>
+
+            <span class="app-footer-copyright">
+                &copy; {% now "Y" %} NutriConnect
+            </span>
+        </div>
+
+        <p class="app-footer-disclaimer">
+            Nutrition support and wellness guidance for your journey.
+        </p>
+    </footer>
+
+    <!-- Shared accessible confirmation modal -->
+    <div id="confirmation-modal" class="nc-modal" hidden aria-hidden="true">
+        <div class="nc-modal-backdrop" data-modal-close></div>
+
+        <section class="nc-modal-dialog"
+                 role="dialog"
+                 aria-modal="true"
+                 aria-labelledby="confirmation-title"
+                 aria-describedby="confirmation-description"
+                 tabindex="-1">
+
+            <button type="button"
+                    class="nc-modal-close"
+                    aria-label="Close confirmation dialog"
+                    data-modal-close>
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                </svg>
+            </button>
+
+            <div class="nc-modal-symbol" id="confirmation-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M12 8V12M12 16H12.01M10.3 3.9L2.6 17.2C1.8 18.6 2.8 20.3 4.4 20.3H19.6C21.2 20.3 22.2 18.6 21.4 17.2L13.7 3.9C12.9 2.5 11.1 2.5 10.3 3.9Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+
+            <span class="nc-modal-eyebrow">NutriConnect confirmation</span>
+
+            <h2 id="confirmation-title" class="nc-modal-title">Are you sure?</h2>
+
+            <p id="confirmation-description" class="nc-modal-description">
+                Please confirm that you want to continue with this action.
+            </p>
+
+            <div class="nc-modal-actions">
+                <button type="button"
+                        id="confirmation-cancel"
+                        class="nc-modal-button nc-modal-button-secondary">
+                    Go back
+                </button>
+
+                <button type="button"
+                        id="confirmation-confirm"
+                        class="nc-modal-button nc-modal-button-primary">
+                    Confirm
+                </button>
+            </div>
+
+            <p class="nc-modal-footnote">Please review your choice before continuing.</p>
+        </section>
+    </div>
+
+    <script>
+        (() => {
+            const modal = document.getElementById("confirmation-modal");
+            if (!modal) return;
+
+            const title = document.getElementById("confirmation-title");
+            const description = document.getElementById("confirmation-description");
+            const icon = document.getElementById("confirmation-icon");
+            const confirmButton = document.getElementById("confirmation-confirm");
+            const cancelButton = document.getElementById("confirmation-cancel");
+            const closeButton = modal.querySelector(".nc-modal-close");
+
+            let formToSubmit = null;
+            let previousFocus = null;
+
+            const setVariant = (variant) => {
+                confirmButton.classList.remove("nc-modal-button-danger");
+                icon.classList.remove("nc-modal-symbol-danger", "nc-modal-symbol-success");
+
+                if (variant === "danger") {
+                    confirmButton.classList.add("nc-modal-button-danger");
+                    icon.classList.add("nc-modal-symbol-danger");
+                } else if (variant === "success") {
+                    icon.classList.add("nc-modal-symbol-success");
+                }
+            };
+
+            const openModal = (form) => {
+                formToSubmit = form;
+                previousFocus = document.activeElement;
+
+                title.textContent = form.dataset.confirmTitle || "Are you sure?";
+                description.textContent =
+                    form.dataset.confirm || "Please confirm that you want to continue.";
+                confirmButton.textContent = form.dataset.confirmButton || "Confirm";
+                cancelButton.textContent = form.dataset.cancelButton || "Go back";
+
+                setVariant(form.dataset.confirmVariant || "default");
+
+                modal.hidden = false;
+                modal.setAttribute("aria-hidden", "false");
+                document.body.style.overflow = "hidden";
+
+                requestAnimationFrame(() => confirmButton.focus());
+            };
+
+            const closeModal = () => {
+                modal.hidden = true;
+                modal.setAttribute("aria-hidden", "true");
+                document.body.style.overflow = "";
+                formToSubmit = null;
+
+                if (previousFocus && typeof previousFocus.focus === "function") {
+                    previousFocus.focus();
+                }
+            };
+
+            document.addEventListener("submit", (event) => {
+                const form = event.target;
+
+                if (!(form instanceof HTMLFormElement)) return;
+                if (!form.hasAttribute("data-confirm")) return;
+
+                if (form.dataset.confirmApproved === "true") {
+                    delete form.dataset.confirmApproved;
+                    return;
+                }
+
+                event.preventDefault();
+                openModal(form);
+            });
+
+            confirmButton.addEventListener("click", () => {
+                if (!formToSubmit) return;
+
+                const form = formToSubmit;
+                formToSubmit = null;
+                closeModal();
+
+                form.dataset.confirmApproved = "true";
+                HTMLFormElement.prototype.submit.call(form);
+            });
+
+            cancelButton.addEventListener("click", closeModal);
+            closeButton.addEventListener("click", closeModal);
+
+            modal.querySelectorAll("[data-modal-close]").forEach((element) => {
+                element.addEventListener("click", closeModal);
+            });
+
+            document.addEventListener("keydown", (event) => {
+                if (modal.hidden) return;
+
+                if (event.key === "Escape") {
+                    event.preventDefault();
+                    closeModal();
+                    return;
+                }
+
+                if (event.key === "Tab") {
+                    const focusable = [
+                        closeButton,
+                        cancelButton,
+                        confirmButton
+                    ].filter((element) => !element.disabled);
+
+                    const first = focusable[0];
+                    const last = focusable[focusable.length - 1];
+
+                    if (event.shiftKey && document.activeElement === first) {
+                        event.preventDefault();
+                        last.focus();
+                    } else if (!event.shiftKey && document.activeElement === last) {
+                        event.preventDefault();
+                        first.focus();
+                    }
+                }
+            });
+        })();
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,561 @@
+{% extends "base.html" %}
+
+{% block title %}Consultation Notes | NutriConnect{% endblock %}
+
+{% block content %}
+<div class="consultation-workspace">
+
+    <style>
+        .consultation-workspace {
+            --note-green: #47795d;
+            --note-green-dark: #315941;
+            --note-green-soft: #edf5ed;
+            --note-ink: #26372d;
+            --note-muted: #758178;
+            --note-border: #e4eae2;
+            max-width: 1060px;
+            margin: 0 auto;
+            padding: 10px 0 42px;
+            color: var(--note-ink);
+        }
+
+        .consultation-workspace *,
+        .consultation-workspace *::before,
+        .consultation-workspace *::after {
+            box-sizing: border-box;
+        }
+
+        .consultation-workspace .note-hero {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            padding: clamp(23px, 4vw, 36px);
+            margin-bottom: 24px;
+            border: 1px solid #dce8dc;
+            border-radius: 24px;
+            background:
+                radial-gradient(ellipse at 100% 0%, rgba(255,255,255,.8), transparent 44%),
+                linear-gradient(125deg, #edf5eb, #f8f8f1 60%, #e5f0e5);
+        }
+
+        .consultation-workspace .note-eyebrow {
+            margin: 0 0 9px;
+            color: var(--note-green);
+            font-size: .72rem;
+            font-weight: 800;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+        }
+
+        .consultation-workspace .note-hero h1 {
+            margin: 0;
+            color: #254432;
+            font-size: clamp(1.8rem, 4vw, 2.4rem);
+            font-weight: 800;
+            letter-spacing: -.04em;
+            line-height: 1.2;
+        }
+
+        .consultation-workspace .note-hero p.note-intro {
+            max-width: 620px;
+            margin: 12px 0 0;
+            color: #647367;
+            font-size: .95rem;
+            line-height: 1.75;
+        }
+
+        .consultation-workspace .note-hero-icon {
+            display: grid;
+            flex: 0 0 76px;
+            width: 76px;
+            height: 76px;
+            place-items: center;
+            border: 1px solid rgba(71,121,93,.16);
+            border-radius: 23px;
+            background: rgba(255,255,255,.68);
+            color: var(--note-green);
+            font-size: 2.35rem;
+        }
+
+        .consultation-workspace .note-panel {
+            margin-top: 22px;
+            overflow: hidden;
+            border: 1px solid var(--note-border);
+            border-radius: 21px;
+            background: #fff;
+            box-shadow: 0 7px 26px rgba(35,65,45,.045);
+        }
+
+        .consultation-workspace .note-panel-header {
+            padding: 22px 25px;
+            border-bottom: 1px solid var(--note-border);
+            background: linear-gradient(110deg, #fff, #f9fbf7);
+        }
+
+        .consultation-workspace .note-panel-header h2 {
+            margin: 0;
+            color: var(--note-ink);
+            font-size: 1.2rem;
+            font-weight: 750;
+            letter-spacing: -.02em;
+        }
+
+        .consultation-workspace .note-panel-header p {
+            margin: 7px 0 0;
+            color: var(--note-muted);
+            font-size: .88rem;
+            line-height: 1.65;
+        }
+
+        .consultation-workspace .note-panel-body {
+            padding: clamp(19px, 3vw, 28px);
+        }
+
+        .consultation-workspace .note-details-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 13px;
+        }
+
+        .consultation-workspace .note-detail {
+            min-width: 0;
+            padding: 15px 16px;
+            border: 1px solid #e8eee6;
+            border-radius: 15px;
+            background: #fbfcfa;
+        }
+
+        .consultation-workspace .note-detail-label {
+            display: block;
+            margin-bottom: 7px;
+            color: #788479;
+            font-size: .73rem;
+            font-weight: 750;
+            letter-spacing: .045em;
+            text-transform: uppercase;
+        }
+
+        .consultation-workspace .note-detail-value {
+            display: block;
+            color: #304737;
+            font-size: .94rem;
+            font-weight: 650;
+            line-height: 1.6;
+            overflow-wrap: anywhere;
+        }
+
+        .consultation-workspace .note-detail-reason {
+            grid-column: 1 / -1;
+        }
+
+        .consultation-workspace .note-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            width: fit-content;
+            max-width: 100%;
+            padding: 6px 10px;
+            border: 1px solid #dce9dd;
+            border-radius: 999px;
+            background: var(--note-green-soft);
+            color: var(--note-green-dark);
+            font-size: .78rem;
+            font-weight: 750;
+        }
+
+        .consultation-workspace .note-status::before {
+            width: 6px;
+            height: 6px;
+            flex: 0 0 6px;
+            border-radius: 50%;
+            background: currentColor;
+            content: "";
+        }
+
+        .consultation-workspace .note-form {
+            display: grid;
+            gap: 24px;
+        }
+
+        .consultation-workspace .note-form-intro {
+            margin: 0 0 2px;
+            color: var(--note-muted);
+            font-size: .91rem;
+            line-height: 1.75;
+        }
+
+        .consultation-workspace .note-field {
+            min-width: 0;
+        }
+
+        .consultation-workspace .note-field label {
+            display: block;
+            margin-bottom: 9px;
+            color: #304737;
+            font-size: .94rem;
+            font-weight: 750;
+        }
+
+        .consultation-workspace .note-field textarea,
+        .consultation-workspace .note-field input,
+        .consultation-workspace .note-field select {
+            display: block;
+            width: 100%;
+            max-width: 100%;
+            min-height: 48px;
+            padding: 12px 14px;
+            border: 1px solid #dce5da;
+            border-radius: 12px;
+            background: #fff;
+            color: #26372d;
+            font: inherit;
+            line-height: 1.65;
+            transition: border-color .16s ease, box-shadow .16s ease;
+        }
+
+        .consultation-workspace .note-field textarea {
+            min-height: 190px;
+            resize: vertical;
+        }
+
+        .consultation-workspace .note-field textarea:focus,
+        .consultation-workspace .note-field input:focus,
+        .consultation-workspace .note-field select:focus {
+            border-color: #6a9b79;
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(71,121,93,.12);
+        }
+
+        .consultation-workspace .note-field textarea::placeholder {
+            color: #99a39a;
+        }
+
+        .consultation-workspace .note-field small {
+            display: block;
+            margin-top: 8px;
+            color: #788479;
+            font-size: .82rem;
+            line-height: 1.65;
+        }
+
+        .consultation-workspace .note-field .helptext {
+            display: block;
+            margin-top: 8px;
+            color: #788479;
+            font-size: .82rem;
+            line-height: 1.65;
+        }
+
+        .consultation-workspace .note-field ul.errorlist,
+        .consultation-workspace ul.errorlist {
+            margin: 8px 0;
+            padding: 10px 13px 10px 32px;
+            border: 1px solid #f0d4d0;
+            border-radius: 10px;
+            background: #fff4f2;
+            color: #9c4137;
+            font-size: .86rem;
+            line-height: 1.6;
+        }
+
+        .consultation-workspace .note-error-summary {
+            margin-bottom: 20px;
+            padding: 14px 16px;
+            border: 1px solid #f0d4d0;
+            border-radius: 12px;
+            background: #fff4f2;
+            color: #8e3e35;
+        }
+
+        .consultation-workspace .note-error-summary p {
+            margin: 4px 0 0;
+            font-size: .88rem;
+            line-height: 1.6;
+        }
+
+        .consultation-workspace .note-field .form-errors {
+            margin: 8px 0 0;
+            color: #a13f35;
+            font-size: .85rem;
+            line-height: 1.6;
+        }
+
+        .consultation-workspace .note-field .form-errors ul {
+            margin: 5px 0;
+            padding-left: 20px;
+        }
+
+        .consultation-workspace .note-field .form-errors li {
+            margin-top: 3px;
+        }
+
+        .consultation-workspace .note-actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 11px;
+            padding-top: 20px;
+            border-top: 1px solid #edf0eb;
+        }
+
+        .consultation-workspace .note-actions .btn {
+            min-height: 43px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .consultation-workspace .note-privacy {
+            display: flex;
+            align-items: flex-start;
+            gap: 11px;
+            margin-top: 20px;
+            padding: 15px 16px;
+            border: 1px solid #e0e9de;
+            border-radius: 13px;
+            background: #f5f9f3;
+            color: #647568;
+            font-size: .84rem;
+            line-height: 1.7;
+        }
+
+        .consultation-workspace .note-privacy-icon {
+            flex: 0 0 auto;
+            color: var(--note-green);
+            font-size: 1.05rem;
+        }
+
+        .consultation-workspace a:focus-visible,
+        .consultation-workspace button:focus-visible {
+            outline: 3px solid #84b995;
+            outline-offset: 3px;
+        }
+
+        @media (max-width: 600px) {
+            .consultation-workspace .note-hero {
+                align-items: flex-start;
+                gap: 12px;
+                padding: 23px 19px;
+                border-radius: 20px;
+            }
+
+            .consultation-workspace .note-hero-icon {
+                flex-basis: 49px;
+                width: 49px;
+                height: 49px;
+                border-radius: 15px;
+                font-size: 1.6rem;
+            }
+
+            .consultation-workspace .note-details-grid {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .consultation-workspace .note-detail-reason {
+                grid-column: auto;
+            }
+
+            .consultation-workspace .note-panel-header {
+                padding: 19px;
+            }
+
+            .consultation-workspace .note-panel-body {
+                padding: 19px;
+            }
+
+            .consultation-workspace .note-field textarea {
+                min-height: 165px;
+            }
+
+            .consultation-workspace .note-actions {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .consultation-workspace .note-actions .btn {
+                width: 100%;
+                text-align: center;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .consultation-workspace *,
+            .consultation-workspace *::before,
+            .consultation-workspace *::after {
+                scroll-behavior: auto !important;
+                transition-duration: .01ms !important;
+                animation-duration: .01ms !important;
+            }
+        }
+    </style>
+
+    <header class="note-hero">
+        <div>
+            <p class="note-eyebrow">Dietitian workspace / Patient care</p>
+
+            <h1>
+                {% if note %}
+                    Consultation notes
+                {% else %}
+                    New consultation record
+                {% endif %}
+            </h1>
+
+            <p class="note-intro">
+                Document your consultation with
+                <strong>{{ appointment.consumer.username }}</strong>
+                and prepare personalized nutrition recommendations.
+            </p>
+        </div>
+
+        <div class="note-hero-icon" aria-hidden="true">✎</div>
+    </header>
+
+    <section class="note-panel" aria-labelledby="appointment-details-heading">
+        <div class="note-panel-header">
+            <p class="note-eyebrow">Session overview</p>
+            <h2 id="appointment-details-heading">Appointment details</h2>
+            <p>Review the consultation information before recording your notes.</p>
+        </div>
+
+        <div class="note-panel-body">
+            <div class="note-details-grid">
+                <div class="note-detail">
+                    <span class="note-detail-label">Consumer</span>
+                    <span class="note-detail-value">
+                        {{ appointment.consumer.username }}
+                    </span>
+                </div>
+
+                <div class="note-detail">
+                    <span class="note-detail-label">Dietitian</span>
+                    <span class="note-detail-value">
+                        {{ appointment.dietitian.username }}
+                    </span>
+                </div>
+
+                <div class="note-detail">
+                    <span class="note-detail-label">Appointment date</span>
+                    <span class="note-detail-value">
+                        {{ appointment.scheduled_at|date:"M d, Y" }}
+                    </span>
+                </div>
+
+                <div class="note-detail">
+                    <span class="note-detail-label">Appointment time</span>
+                    <span class="note-detail-value">
+                        {{ appointment.scheduled_at|date:"g:i A" }}
+                    </span>
+                </div>
+
+                <div class="note-detail note-detail-reason">
+                    <span class="note-detail-label">Reason for consultation</span>
+                    <span class="note-detail-value">
+                        {{ appointment.reason|default:"Not provided" }}
+                    </span>
+                </div>
+
+                <div class="note-detail note-detail-reason">
+                    <span class="note-detail-label">Appointment status</span>
+                    <span class="note-status">
+                        {{ appointment.get_status_display }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="note-panel" aria-labelledby="consultation-record-heading">
+        <div class="note-panel-header">
+            <p class="note-eyebrow">Clinical documentation</p>
+
+            <h2 id="consultation-record-heading">
+                {% if note %}
+                    Edit consultation record
+                {% else %}
+                    Create consultation record
+                {% endif %}
+            </h2>
+
+            <p>
+                Keep your consultation notes separate from the recommendations
+                intended for the consumer.
+            </p>
+        </div>
+
+        <div class="note-panel-body">
+            {% if form.non_field_errors %}
+                <div class="note-error-summary" role="alert">
+                    <strong>Please review the form.</strong>
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <form method="post" class="note-form">
+                {% csrf_token %}
+
+                <div class="note-field">
+                    <label for="{{ form.notes.id_for_label }}">
+                        {{ form.notes.label }}
+                    </label>
+
+                    {{ form.notes }}
+
+                    {% if form.notes.help_text %}
+                        <small>{{ form.notes.help_text }}</small>
+                    {% endif %}
+
+                    {% if form.notes.errors %}
+                        <div class="form-errors" role="alert">
+                            {{ form.notes.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="note-field">
+                    <label for="{{ form.recommendations.id_for_label }}">
+                        {{ form.recommendations.label }}
+                    </label>
+
+                    {{ form.recommendations }}
+
+                    {% if form.recommendations.help_text %}
+                        <small>{{ form.recommendations.help_text }}</small>
+                    {% endif %}
+
+                    {% if form.recommendations.errors %}
+                        <div class="form-errors" role="alert">
+                            {{ form.recommendations.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="note-actions">
+                    <button type="submit" class="btn btn-primary">
+                        {% if note %}
+                            Save changes
+                        {% else %}
+                            Save consultation record
+                        {% endif %}
+                    </button>
+
+                    <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+                        Back to dashboard
+                    </a>
+                </div>
+            </form>
+
+            <div class="note-privacy">
+                <span class="note-privacy-icon" aria-hidden="true">✦</span>
+                <div>
+                    <strong>Keep patient care clear and organized.</strong>
+                    Record clinical observations in consultation notes and put
+                    consumer-facing guidance in the recommendations field.
+                </div>
+            </div>
+        </div>
+    </section>
+
+</div>
+{% endblock %}

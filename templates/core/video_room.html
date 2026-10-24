@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Video Consultation</h1>
+        <p>
+            Appointment with
+            {% if request.user.id == appointment.consumer_id %}
+                your dietitian.
+            {% else %}
+                {{ appointment.consumer.username }}.
+            {% endif %}
+        </p>
+    </div>
+</div>
+
+<div class="card" style="margin-bottom: 20px;">
+    <h2>Before you join</h2>
+    <p>
+        Check that your microphone and camera are working.
+        Use a quiet place and avoid sharing sensitive personal information
+        during this demonstration.
+    </p>
+
+    <p>
+        <strong>Appointment:</strong>
+        {{ appointment.scheduled_at|date:"M d, Y, h:i A" }}
+    </p>
+
+    <a
+        href="{{ room_url }}"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="btn btn-primary"
+    >
+        Join Video Meeting
+    </a>
+
+    <a href="{% url 'dashboard' %}" class="btn">
+        Back to Dashboard
+    </a>
+</div>
+
+<div class="card">
+    <h2>Meeting information</h2>
+    <p>
+        NutriConnect opens the Jitsi Meet room in a new browser tab.
+        The consumer and assigned dietitian use the same room for
+        this appointment.
+    </p>
+    <p>
+        If the meeting does not open, check your internet connection
+        and allow camera and microphone access in your browser.
+    </p>
+</div>
+{% endblock %}

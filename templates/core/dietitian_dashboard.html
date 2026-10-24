@@ -1,0 +1,885 @@
+{% extends "base.html" %}
+
+{% block title %}Dietitian Dashboard | NutriConnect{% endblock %}
+
+{% block content %}
+<div class="dietitian-dashboard">
+
+    <style>
+        .dietitian-dashboard {
+            --diet-green: #47795d;
+            --diet-green-dark: #315941;
+            --diet-green-soft: #eaf3ec;
+            --diet-ink: #26372d;
+            --diet-muted: #758178;
+            --diet-line: #e6ebe5;
+            --diet-surface: #ffffff;
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 12px 0 44px;
+            color: var(--diet-ink);
+        }
+
+        .dietitian-dashboard *,
+        .dietitian-dashboard *::before,
+        .dietitian-dashboard *::after {
+            box-sizing: border-box;
+        }
+
+        .dietitian-dashboard .diet-hero {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+            overflow: hidden;
+            padding: clamp(24px, 4vw, 40px);
+            margin-bottom: 30px;
+            border: 1px solid #dce9dd;
+            border-radius: 26px;
+            background:
+                radial-gradient(ellipse at 100% 0%, rgba(255,255,255,.85), transparent 42%),
+                linear-gradient(125deg, #eef5eb 0%, #f8f8f0 58%, #e4f0e6 100%);
+        }
+
+        .dietitian-dashboard .diet-hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 680px;
+        }
+
+        .dietitian-dashboard .diet-eyebrow {
+            margin: 0 0 9px;
+            color: var(--diet-green);
+            font-size: .72rem;
+            font-weight: 800;
+            letter-spacing: .13em;
+            text-transform: uppercase;
+        }
+
+        .dietitian-dashboard .diet-hero h1 {
+            margin: 0;
+            color: #254432;
+            font-size: clamp(1.8rem, 4vw, 2.55rem);
+            font-weight: 750;
+            letter-spacing: -.045em;
+            line-height: 1.15;
+        }
+
+        .dietitian-dashboard .diet-hero-description {
+            max-width: 570px;
+            margin: 14px 0 0;
+            color: #647367;
+            font-size: .98rem;
+            line-height: 1.75;
+        }
+
+        .dietitian-dashboard .diet-hero-art {
+            display: grid;
+            flex: 0 0 112px;
+            width: 112px;
+            height: 112px;
+            place-items: center;
+            border: 1px solid rgba(71,121,93,.15);
+            border-radius: 32px;
+            background: rgba(255,255,255,.62);
+            color: var(--diet-green);
+            font-size: 3.6rem;
+            box-shadow: 0 12px 30px rgba(49,89,65,.07);
+            transform: rotate(3deg);
+        }
+
+        .dietitian-dashboard .diet-section {
+            margin-top: 32px;
+        }
+
+        .dietitian-dashboard .diet-section-heading {
+            display: flex;
+            align-items: end;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 17px;
+        }
+
+        .dietitian-dashboard .diet-section-heading h2 {
+            margin: 0;
+            color: var(--diet-ink);
+            font-size: clamp(1.25rem, 2.5vw, 1.55rem);
+            font-weight: 750;
+            letter-spacing: -.025em;
+        }
+
+        .dietitian-dashboard .diet-section-description {
+            margin: 7px 0 0;
+            color: var(--diet-muted);
+            font-size: .9rem;
+            line-height: 1.6;
+        }
+
+        .dietitian-dashboard .diet-stats {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .dietitian-dashboard .diet-stat-card {
+            position: relative;
+            overflow: hidden;
+            min-width: 0;
+            padding: 23px;
+            border: 1px solid var(--diet-line);
+            border-radius: 20px;
+            background: var(--diet-surface);
+            box-shadow: 0 5px 20px rgba(35,65,45,.035);
+            transition: transform .18s ease, box-shadow .18s ease;
+        }
+
+        .dietitian-dashboard .diet-stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 26px rgba(35,65,45,.075);
+        }
+
+        .dietitian-dashboard .diet-stat-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .dietitian-dashboard .diet-stat-label {
+            margin: 0;
+            color: #69766c;
+            font-size: .87rem;
+            font-weight: 650;
+        }
+
+        .dietitian-dashboard .diet-stat-icon {
+            display: grid;
+            flex: 0 0 44px;
+            width: 44px;
+            height: 44px;
+            place-items: center;
+            border-radius: 14px;
+            background: var(--diet-green-soft);
+            color: var(--diet-green-dark);
+            font-size: 1.45rem;
+        }
+
+        .dietitian-dashboard .diet-stat-number {
+            margin: 17px 0 5px;
+            color: #263c2e;
+            font-size: clamp(2rem, 4vw, 2.55rem);
+            font-weight: 800;
+            letter-spacing: -.055em;
+            line-height: 1;
+        }
+
+        .dietitian-dashboard .diet-stat-help {
+            margin: 0;
+            color: var(--diet-muted);
+            font-size: .83rem;
+            line-height: 1.5;
+        }
+
+        .dietitian-dashboard .diet-appointments-panel {
+            overflow: hidden;
+            border: 1px solid var(--diet-line);
+            border-radius: 22px;
+            background: #fff;
+            box-shadow: 0 6px 24px rgba(35,65,45,.04);
+        }
+
+        .dietitian-dashboard .diet-panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            padding: 23px 25px;
+            border-bottom: 1px solid var(--diet-line);
+            background: linear-gradient(115deg, #fff 50%, #f8faf6);
+        }
+
+        .dietitian-dashboard .diet-panel-header h2 {
+            margin: 0;
+            color: var(--diet-ink);
+            font-size: 1.22rem;
+            font-weight: 750;
+        }
+
+        .dietitian-dashboard .diet-count-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 34px;
+            min-height: 30px;
+            padding: 5px 10px;
+            border: 1px solid #dce9dd;
+            border-radius: 999px;
+            background: var(--diet-green-soft);
+            color: var(--diet-green-dark);
+            font-size: .8rem;
+            font-weight: 750;
+        }
+
+        .dietitian-dashboard .diet-appointment-list {
+            display: grid;
+            gap: 0;
+        }
+
+        .dietitian-dashboard .diet-appointment {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr);
+            gap: 18px;
+            padding: 23px 25px;
+            border-bottom: 1px solid #edf0eb;
+            transition: background .18s ease;
+        }
+
+        .dietitian-dashboard .diet-appointment:last-child {
+            border-bottom: 0;
+        }
+
+        .dietitian-dashboard .diet-appointment:hover {
+            background: #fbfcfa;
+        }
+
+        .dietitian-dashboard .diet-appointment-main {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            min-width: 0;
+        }
+
+        .dietitian-dashboard .diet-patient-avatar {
+            display: grid;
+            flex: 0 0 48px;
+            width: 48px;
+            height: 48px;
+            place-items: center;
+            border: 1px solid #dce9dd;
+            border-radius: 16px;
+            background: linear-gradient(145deg, #edf5ed, #e2eee4);
+            color: #315941;
+            font-size: 1.15rem;
+            font-weight: 800;
+        }
+
+        .dietitian-dashboard .diet-patient-info {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .dietitian-dashboard .diet-patient-name {
+            margin: 1px 0 5px;
+            overflow-wrap: anywhere;
+            color: #263c2e;
+            font-size: 1rem;
+            font-weight: 750;
+        }
+
+        .dietitian-dashboard .diet-appointment-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px 15px;
+            margin-top: 8px;
+            color: #718076;
+            font-size: .82rem;
+            line-height: 1.6;
+        }
+
+        .dietitian-dashboard .diet-reason {
+            margin: 11px 0 0;
+            color: #5f6d63;
+            font-size: .9rem;
+            line-height: 1.7;
+            overflow-wrap: anywhere;
+        }
+
+        .dietitian-dashboard .diet-reason-label {
+            color: #344d3b;
+            font-weight: 700;
+        }
+
+        .dietitian-dashboard .diet-appointment-topline {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .dietitian-dashboard .diet-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            max-width: 100%;
+            padding: 6px 10px;
+            border: 1px solid transparent;
+            border-radius: 999px;
+            font-size: .75rem;
+            font-weight: 750;
+            line-height: 1.25;
+        }
+
+        .dietitian-dashboard .diet-status::before {
+            width: 6px;
+            height: 6px;
+            flex: 0 0 6px;
+            border-radius: 50%;
+            background: currentColor;
+            content: "";
+        }
+
+        .dietitian-dashboard .diet-status-pending {
+            border-color: #f1dfb6;
+            background: #fff7e5;
+            color: #8a641c;
+        }
+
+        .dietitian-dashboard .diet-status-approved {
+            border-color: #cfe5d4;
+            background: #eaf6ed;
+            color: #2f7045;
+        }
+
+        .dietitian-dashboard .diet-status-completed {
+            border-color: #d7dff2;
+            background: #eef2fc;
+            color: #455e9b;
+        }
+
+        .dietitian-dashboard .diet-status-rejected,
+        .dietitian-dashboard .diet-status-cancelled {
+            border-color: #ead8d5;
+            background: #faf0ee;
+            color: #96554b;
+        }
+
+        .dietitian-dashboard .diet-status-other {
+            border-color: #e3e8e1;
+            background: #f4f6f2;
+            color: #647166;
+        }
+
+        .dietitian-dashboard .diet-actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 9px;
+            min-width: 0;
+        }
+
+        .dietitian-dashboard .diet-actions form {
+            display: inline-flex;
+            flex-wrap: wrap;
+            margin: 0;
+        }
+
+        .dietitian-dashboard .diet-actions .btn {
+            min-height: 36px;
+            white-space: normal;
+            text-align: center;
+        }
+
+        .dietitian-dashboard .diet-empty {
+            padding: 48px 24px;
+            text-align: center;
+        }
+
+        .dietitian-dashboard .diet-empty-icon {
+            display: grid;
+            width: 66px;
+            height: 66px;
+            margin: 0 auto 17px;
+            place-items: center;
+            border: 1px solid #dce9dd;
+            border-radius: 22px;
+            background: #edf5ed;
+            color: var(--diet-green);
+            font-size: 2rem;
+        }
+
+        .dietitian-dashboard .diet-empty h3 {
+            margin: 0;
+            color: #304737;
+            font-size: 1.12rem;
+            font-weight: 750;
+        }
+
+        .dietitian-dashboard .diet-empty p {
+            max-width: 410px;
+            margin: 9px auto 0;
+            color: var(--diet-muted);
+            font-size: .9rem;
+            line-height: 1.75;
+        }
+
+        .dietitian-dashboard .diet-footer-note {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 23px;
+            padding: 15px 18px;
+            border: 1px solid #e0e9de;
+            border-radius: 15px;
+            background: rgba(239,246,237,.7);
+            color: #647568;
+            font-size: .83rem;
+            line-height: 1.6;
+        }
+
+        .dietitian-dashboard .diet-footer-note span {
+            color: var(--diet-green);
+            font-size: 1.1rem;
+        }
+
+        .dietitian-dashboard a:focus-visible,
+        .dietitian-dashboard button:focus-visible {
+            outline: 3px solid #84b995;
+            outline-offset: 3px;
+        }
+
+        @media (min-width: 760px) {
+            .dietitian-dashboard .diet-appointment {
+                grid-template-columns: minmax(0, 1fr) minmax(220px, .65fr);
+                align-items: center;
+            }
+
+            .dietitian-dashboard .diet-actions {
+                justify-content: flex-end;
+                align-content: center;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .dietitian-dashboard {
+                padding-top: 4px;
+            }
+
+            .dietitian-dashboard .diet-hero {
+                align-items: flex-start;
+                gap: 12px;
+                padding: 24px 20px;
+                border-radius: 21px;
+            }
+
+            .dietitian-dashboard .diet-hero-art {
+                flex-basis: 58px;
+                width: 58px;
+                height: 58px;
+                border-radius: 18px;
+                font-size: 1.9rem;
+            }
+
+            .dietitian-dashboard .diet-hero-description {
+                font-size: .9rem;
+            }
+
+            .dietitian-dashboard .diet-stats {
+                gap: 12px;
+            }
+
+            .dietitian-dashboard .diet-stat-card {
+                padding: 17px;
+                border-radius: 17px;
+            }
+
+            .dietitian-dashboard .diet-stat-icon {
+                flex-basis: 36px;
+                width: 36px;
+                height: 36px;
+                border-radius: 12px;
+                font-size: 1.2rem;
+            }
+
+            .dietitian-dashboard .diet-stat-number {
+                margin-top: 15px;
+            }
+
+            .dietitian-dashboard .diet-panel-header {
+                padding: 19px 17px;
+            }
+
+            .dietitian-dashboard .diet-appointment {
+                padding: 19px 17px;
+            }
+
+            .dietitian-dashboard .diet-appointment-main {
+                gap: 11px;
+            }
+
+            .dietitian-dashboard .diet-patient-avatar {
+                flex-basis: 42px;
+                width: 42px;
+                height: 42px;
+                border-radius: 14px;
+            }
+
+            .dietitian-dashboard .diet-actions {
+                padding-left: 0;
+            }
+
+            .dietitian-dashboard .diet-actions .btn {
+                padding: 8px 10px;
+                font-size: .78rem;
+            }
+
+            .dietitian-dashboard .diet-footer-note {
+                align-items: flex-start;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .dietitian-dashboard .diet-hero-art {
+                display: none;
+            }
+
+            .dietitian-dashboard .diet-stats {
+                grid-template-columns: minmax(0, 1fr);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .dietitian-dashboard *,
+            .dietitian-dashboard *::before,
+            .dietitian-dashboard *::after {
+                scroll-behavior: auto !important;
+                transition-duration: .01ms !important;
+                animation-duration: .01ms !important;
+                animation-iteration-count: 1 !important;
+            }
+        }
+    </style>
+
+    <header class="diet-hero">
+        <div class="diet-hero-content">
+            <p class="diet-eyebrow">Dietitian workspace</p>
+            <h1>Your patient care dashboard</h1>
+            <p class="diet-hero-description">
+                A clearer view of your consultations, patient requests, and
+                ongoing nutrition care. Every appointment is an opportunity
+                to help someone build healthier habits.
+            </p>
+        </div>
+
+        <div class="diet-hero-art" aria-hidden="true">✿</div>
+    </header>
+
+    <section aria-labelledby="practice-overview-heading">
+        <div class="diet-section-heading">
+            <div>
+                <p class="diet-eyebrow">At a glance</p>
+                <h2 id="practice-overview-heading">Practice overview</h2>
+                <p class="diet-section-description">
+                    Keep track of your patients and requests that need attention.
+                </p>
+            </div>
+        </div>
+
+        <div class="diet-stats">
+            <article class="diet-stat-card">
+                <div class="diet-stat-top">
+                    <p class="diet-stat-label">Patients</p>
+                    <span class="diet-stat-icon" aria-hidden="true">♡</span>
+                </div>
+                <p class="diet-stat-number">
+                    {{ patient_count|default_if_none:0 }}
+                </p>
+                <p class="diet-stat-help">Consumers in your care</p>
+            </article>
+
+            <article class="diet-stat-card">
+                <div class="diet-stat-top">
+                    <p class="diet-stat-label">Pending requests</p>
+                    <span class="diet-stat-icon" aria-hidden="true">◷</span>
+                </div>
+                <p class="diet-stat-number">
+                    {{ pending_count|default_if_none:0 }}
+                </p>
+                <p class="diet-stat-help">Consultations awaiting your review</p>
+            </article>
+        </div>
+    </section>
+
+    <section class="diet-section" aria-labelledby="patient-appointments-heading">
+        <div class="diet-section-heading">
+            <div>
+                <p class="diet-eyebrow">Consultation management</p>
+                <h2 id="patient-appointments-heading">Patient appointments</h2>
+                <p class="diet-section-description">
+                    Review requests, prepare for consultations, and keep patient
+                    care moving forward.
+                </p>
+            </div>
+        </div>
+
+        <div class="diet-appointments-panel">
+            <div class="diet-panel-header">
+                <div>
+                    <h2>Appointment schedule</h2>
+                    <p class="diet-section-description">
+                        Review each appointment and its current status.
+                    </p>
+                </div>
+
+                <span class="diet-count-pill">
+                    {{ appointments|length }}
+                    {% if appointments|length == 1 %}appointment{% else %}appointments{% endif %}
+                </span>
+            </div>
+
+            {% if appointments %}
+                <div class="diet-appointment-list">
+                    {% for appointment in appointments %}
+                        <article class="diet-appointment">
+                            <div class="diet-appointment-main">
+                                <div class="diet-patient-avatar" aria-hidden="true">
+                                    {{ appointment.consumer.username|first|upper }}
+                                </div>
+
+                                <div class="diet-patient-info">
+                                    <div class="diet-appointment-topline">
+                                        <h3 class="diet-patient-name">
+                                            {{ appointment.consumer.username }}
+                                        </h3>
+
+                                        <span class="diet-status {% if appointment.status == 'pending' %}diet-status-pending{% elif appointment.status == 'approved' %}diet-status-approved{% elif appointment.status == 'completed' %}diet-status-completed{% elif appointment.status == 'rejected' %}diet-status-rejected{% elif appointment.status == 'cancelled' %}diet-status-cancelled{% else %}diet-status-other{% endif %}">
+                                            {{ appointment.get_status_display }}
+                                        </span>
+                                    </div>
+
+                                    <div class="diet-appointment-meta">
+                                        <span>
+                                            <span aria-hidden="true">▦</span>
+                                            {{ appointment.scheduled_at|date:"M d, Y" }}
+                                        </span>
+                                        <span>
+                                            <span aria-hidden="true">◷</span>
+                                            {{ appointment.scheduled_at|date:"g:i A" }}
+                                        </span>
+                                    </div>
+
+                                    <p class="diet-reason">
+                                        <span class="diet-reason-label">Consultation reason:</span>
+                                        {{ appointment.reason|default:"General consultation"|truncatechars:160 }}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="diet-actions">
+                                {% if appointment.status == "pending" %}
+                                    <form method="post"
+                                          action="{% url 'appointment_status' appointment.id %}"
+                                          data-confirm="Approve this consultation request? Make sure the scheduled time works for your availability."
+                                          data-confirm-title="Approve appointment?"
+                                          data-confirm-button="Approve appointment"
+                                          data-confirm-variant="success"
+                                          data-confirm-icon="✓">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="status" value="approved">
+                                        <button type="submit" class="btn btn-primary btn-sm">
+                                            Approve
+                                        </button>
+                                    </form>
+
+                                    <form method="post"
+                                          action="{% url 'appointment_status' appointment.id %}"
+                                          data-confirm="Are you sure you want to reject this consultation request?"
+                                          data-confirm-title="Reject request?"
+                                          data-confirm-button="Yes, reject"
+                                          data-confirm-variant="danger">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="status" value="rejected">
+                                        <button type="submit" class="btn btn-danger btn-sm">
+                                            Reject
+                                        </button>
+                                    </form>
+
+                                    <form method="post"
+                                          action="{% url 'appointment_cancel' appointment.id %}"
+                                          data-confirm="Cancel this appointment request? The consumer will no longer have this appointment."
+                                          data-confirm-title="Cancel appointment?"
+                                          data-confirm-button="Yes, cancel"
+                                          data-confirm-variant="danger">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-ghost btn-sm">
+                                            Cancel
+                                        </button>
+                                    </form>
+
+                                {% elif appointment.status == "approved" %}
+                                    <a href="{% url 'video_room' appointment.id %}"
+                                       class="btn btn-primary btn-sm">
+                                        Join consultation
+                                    </a>
+
+                                    <a href="{% url 'consultation_note' appointment.id %}"
+                                       class="btn btn-secondary btn-sm">
+                                        {% if appointment.consultation_note %}
+                                            Edit notes
+                                        {% else %}
+                                            Add notes
+                                        {% endif %}
+                                    </a>
+
+                                    {% if appointment.consultation_note %}
+                                        <form method="post"
+                                              action="{% url 'appointment_complete' appointment.id %}"
+                                              data-confirm="Mark this consultation as completed? Make sure your consultation notes are saved first."
+                                              data-confirm-title="Complete consultation?"
+                                              data-confirm-button="Mark completed"
+                                              data-confirm-variant="success"
+                                              data-confirm-icon="✓">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-secondary btn-sm">
+                                                Complete
+                                            </button>
+                                        </form>
+                                    {% endif %}
+
+                                    <form method="post"
+                                          action="{% url 'appointment_cancel' appointment.id %}"
+                                          data-confirm="Are you sure you want to cancel this approved consultation?"
+                                          data-confirm-title="Cancel consultation?"
+                                          data-confirm-button="Yes, cancel"
+                                          data-confirm-variant="danger">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger btn-sm">
+                                            Cancel
+                                        </button>
+                                    </form>
+
+                                {% elif appointment.status == "completed" %}
+                                    <a href="{% url 'consultation_note' appointment.id %}"
+                                       class="btn btn-secondary btn-sm">
+                                        View / edit notes
+                                    </a>
+
+                                {% elif appointment.status == "rejected" %}
+                                    <span class="diet-stat-help">
+                                        Request rejected
+                                    </span>
+
+                                {% elif appointment.status == "cancelled" %}
+                                    <span class="diet-stat-help">
+                                        Appointment cancelled
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="diet-empty">
+                    <div class="diet-empty-icon" aria-hidden="true">♡</div>
+                    <h3>Your schedule is clear</h3>
+                    <p>
+                        There are no appointments to display yet. New consultation
+                        requests will appear here when consumers book with you.
+                    </p>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <section class="diet-section" aria-labelledby="patient-meals-heading">
+        <div class="diet-section-heading">
+            <div>
+                <p class="diet-eyebrow">Nutrition tracking</p>
+                <h2 id="patient-meals-heading">Recent patient meals</h2>
+                <p class="diet-section-description">
+                    Review meal entries from consumers with approved or completed
+                    consultations in your care.
+                </p>
+            </div>
+        </div>
+
+        <div class="diet-appointments-panel">
+            <div class="diet-panel-header">
+                <div>
+                    <h2>Meal history</h2>
+                    <p class="diet-section-description">
+                        The latest meal entries recorded by your patients.
+                    </p>
+                </div>
+
+                <span class="diet-count-pill">
+                    {{ patient_meals|length }}
+                    {% if patient_meals|length == 1 %}entry{% else %}entries{% endif %}
+                </span>
+            </div>
+
+            {% if patient_meals %}
+                <div class="diet-appointment-list">
+                    {% for meal in patient_meals %}
+                        <article class="diet-appointment">
+                            <div class="diet-appointment-main">
+                                <div class="diet-patient-avatar" aria-hidden="true">
+                                    {{ meal.consumer.username|first|upper }}
+                                </div>
+
+                                <div class="diet-patient-info">
+                                    <div class="diet-appointment-topline">
+                                        <h3 class="diet-patient-name">
+                                            {{ meal.consumer.username }}
+                                        </h3>
+
+                                        <span class="diet-count-pill">
+                                            {{ meal.get_meal_type_display }}
+                                        </span>
+                                    </div>
+
+                                    <p class="diet-reason">
+                                        <span class="diet-reason-label">
+                                            {{ meal.food_name }}
+                                        </span>
+                                    </p>
+
+                                    <div class="diet-appointment-meta">
+                                        <span>
+                                            Date: {{ meal.meal_date|date:"M d, Y" }}
+                                        </span>
+                                        <span>
+                                            Calories: {{ meal.calories }} kcal
+                                        </span>
+                                    </div>
+
+                                    {% if meal.details %}
+                                        <p class="diet-reason">
+                                            {{ meal.details|truncatechars:200 }}
+                                        </p>
+                                    {% endif %}
+
+                                    <p class="diet-section-description">
+                                        Protein: {{ meal.protein }} g
+                                        · Carbohydrates: {{ meal.carbohydrates }} g
+                                        · Fat: {{ meal.fats }} g
+                                    </p>
+                                </div>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="diet-empty">
+                    <div class="diet-empty-icon" aria-hidden="true">♡</div>
+                    <h3>No patient meals to display yet</h3>
+                    <p>
+                        Meal entries will appear here when consumers in your
+                        approved or completed consultations log their meals.
+                    </p>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <div class="diet-footer-note">
+        <span aria-hidden="true">✦</span>
+        <div>
+            <strong>Care that makes a difference.</strong>
+            Small, consistent steps toward better nutrition can lead to meaningful progress.
+        </div>
+    </div>
+
+</div>
+{% endblock %}

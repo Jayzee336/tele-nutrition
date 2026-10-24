@@ -1,0 +1,397 @@
+from datetime import timedelta
+
+from django.contrib.auth import get_user_model
+from django.test import TestCase
+from django.urls import reverse
+from django.utils import timezone
+
+from .forms import AppointmentRequestForm
+from .models import Appointment, UserProfile
+from .views import has_appointment_conflict
+
+
+User = get_user_model()
+
+
+class AppointmentSchedulingTests(TestCase):
+    """Automated tests for NutriConnect scheduling and reliability."""
+
+    def setUp(self):
+        self.consumer = self.create_user(
+            "schedule_consumer", UserProfile.CONSUMER
+        )
+        self.consumer2 = self.create_user(
+            "schedule_consumer2", UserProfile.CONSUMER
+        )
+        self.dietitian = self.create_user(
+            "schedule_dietitian", UserProfile.DIETITIAN
+        )
+        self.dietitian2 = self.create_user(
+            "schedule_dietitian2", UserProfile.DIETITIAN
+        )
+
+        now = timezone.localtime(timezone.now())
+        self.start_time = (
+            now.replace(second=0, microsecond=0) + timedelta(days=7)
+        )
+
+    def create_user(self, username, role):
+        user = User.objects.create_user(
+            username=username,
+            password="TestPassword123!",
+        )
+        UserProfile.objects.create(user=user, role=role)
+        return user
+
+    def create_appointment(
+        self,
+        *,
+        consumer=None,
+        dietitian=None,
+        scheduled_at=None,
+        status="pending",
+    ):
+        return Appointment.objects.create(
+            consumer=consumer or self.consumer,
+            dietitian=dietitian or self.dietitian,
+            scheduled_at=scheduled_at or self.start_time,
+            reason="Automated scheduling test",
+            status=status,
+        )
+
+    # ---------------------------------------------------------
+    # Scheduling and overlap tests
+    # ---------------------------------------------------------
+
+    def test_overlapping_approved_appointment_is_a_conflict(self):
+        self.create_appointment(status="approved")
+
+        conflict = has_appointment_conflict(
+            consumer=self.consumer2,
+            dietitian=self.dietitian,
+            scheduled_at=self.start_time + timedelta(minutes=30),
+        )
+
+        self.assertTrue(conflict)
+
+    def test_pending_appointment_does_not_block_a_slot(self):
+        self.create_appointment(status="pending")
+
+        conflict = has_appointment_conflict(
+            consumer=self.consumer2,
+            dietitian=self.dietitian,
+            scheduled_at=self.start_time,
+        )
+
+        self.assertFalse(conflict)
+
+    def test_back_to_back_appointments_are_allowed(self):
+        self.create_appointment(status="approved")
+
+        conflict = has_appointment_conflict(
+            consumer=self.consumer2,
+            dietitian=self.dietitian,
+            scheduled_at=self.start_time + timedelta(minutes=60),
+        )
+
+        self.assertFalse(conflict)
+
+    def test_one_minute_overlap_is_a_conflict(self):
+        self.create_appointment(status="approved")
+
+        conflict = has_appointment_conflict(
+            consumer=self.consumer2,
+            dietitian=self.dietitian,
+            scheduled_at=self.start_time + timedelta(minutes=59),
+        )
+
+        self.assertTrue(conflict)
+
+    def test_same_consumer_cannot_overlap_approved_appointments(self):
+        self.create_appointment(status="approved")
+        another_dietitian = self.create_user(
+            "another_dietitian", UserProfile.DIETITIAN
+        )
+
+        conflict = has_appointment_conflict(
+            consumer=self.consumer,
+            dietitian=another_dietitian,
+            scheduled_at=self.start_time + timedelta(minutes=30),
+        )
+
+        self.assertTrue(conflict)
+
+    def test_cancelled_appointment_frees_the_time_slot(self):
+        self.create_appointment(status="cancelled")
+
+        conflict = has_appointment_conflict(
+            consumer=self.consumer2,
+            dietitian=self.dietitian,
+            scheduled_at=self.start_time,
+        )
+
+        self.assertFalse(conflict)
+
+    def test_consumer_request_conflicting_with_approved_slot_is_rejected(self):
+        self.create_appointment(status="approved")
+        self.client.force_login(self.consumer2)
+
+        response = self.client.post(
+            reverse("appointment_create"),
+            {
+                "dietitian": self.dietitian.pk,
+                "scheduled_at": (
+                    self.start_time + timedelta(minutes=30)
+                ).strftime("%Y-%m-%dT%H:%M"),
+                "reason": "I would like a nutrition consultation.",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(
+            Appointment.objects.filter(
+                consumer=self.consumer2,
+                status="pending",
+            ).exists()
+        )
+        self.assertIn("scheduled_at", response.context["form"].errors)
+
+    def test_dietitian_cannot_approve_conflicting_request(self):
+        self.create_appointment(status="approved")
+        conflicting_request = self.create_appointment(
+            consumer=self.consumer2,
+            scheduled_at=self.start_time + timedelta(minutes=30),
+            status="pending",
+        )
+        self.client.force_login(self.dietitian)
+
+        response = self.client.post(
+            reverse("appointment_status", args=[conflicting_request.pk]),
+            {"status": "approved"},
+        )
+
+        self.assertRedirects(response, reverse("dashboard"))
+        conflicting_request.refresh_from_db()
+        self.assertEqual(conflicting_request.status, "pending")
+
+    def test_dietitian_can_approve_non_conflicting_request(self):
+        appointment = self.create_appointment(
+            scheduled_at=self.start_time + timedelta(hours=1),
+            status="pending",
+        )
+        self.client.force_login(self.dietitian)
+
+        response = self.client.post(
+            reverse("appointment_status", args=[appointment.pk]),
+            {"status": "approved"},
+        )
+
+        self.assertRedirects(response, reverse("dashboard"))
+        appointment.refresh_from_db()
+        self.assertEqual(appointment.status, "approved")
+
+    # ---------------------------------------------------------
+    # Cancellation tests
+    # ---------------------------------------------------------
+
+    def test_consumer_can_cancel_own_pending_appointment(self):
+        appointment = self.create_appointment(status="pending")
+        self.client.force_login(self.consumer)
+
+        response = self.client.post(
+            reverse("appointment_cancel", args=[appointment.pk])
+        )
+
+        self.assertRedirects(response, reverse("dashboard"))
+        appointment.refresh_from_db()
+        self.assertEqual(appointment.status, "cancelled")
+
+    def test_consumer_can_cancel_own_approved_appointment(self):
+        appointment = self.create_appointment(status="approved")
+        self.client.force_login(self.consumer)
+
+        response = self.client.post(
+            reverse("appointment_cancel", args=[appointment.pk])
+        )
+
+        self.assertRedirects(response, reverse("dashboard"))
+        appointment.refresh_from_db()
+        self.assertEqual(appointment.status, "cancelled")
+
+    def test_dietitian_can_cancel_assigned_pending_appointment(self):
+        appointment = self.create_appointment(status="pending")
+        self.client.force_login(self.dietitian)
+
+        response = self.client.post(
+            reverse("appointment_cancel", args=[appointment.pk])
+        )
+
+        self.assertRedirects(response, reverse("dashboard"))
+        appointment.refresh_from_db()
+        self.assertEqual(appointment.status, "cancelled")
+
+    def test_dietitian_can_cancel_assigned_approved_appointment(self):
+        appointment = self.create_appointment(status="approved")
+        self.client.force_login(self.dietitian)
+
+        response = self.client.post(
+            reverse("appointment_cancel", args=[appointment.pk])
+        )
+
+        self.assertRedirects(response, reverse("dashboard"))
+        appointment.refresh_from_db()
+        self.assertEqual(appointment.status, "cancelled")
+
+    def test_consumer_cannot_cancel_another_consumers_appointment(self):
+        appointment = self.create_appointment(
+            consumer=self.consumer,
+            status="pending",
+        )
+        self.client.force_login(self.consumer2)
+
+        response = self.client.post(
+            reverse("appointment_cancel", args=[appointment.pk])
+        )
+
+        self.assertEqual(response.status_code, 404)
+        appointment.refresh_from_db()
+        self.assertEqual(appointment.status, "pending")
+
+    def test_dietitian_cannot_cancel_another_dietitians_appointment(self):
+        appointment = self.create_appointment(
+            dietitian=self.dietitian,
+            status="pending",
+        )
+        self.client.force_login(self.dietitian2)
+
+        response = self.client.post(
+            reverse("appointment_cancel", args=[appointment.pk])
+        )
+
+        self.assertEqual(response.status_code, 404)
+        appointment.refresh_from_db()
+        self.assertEqual(appointment.status, "pending")
+
+    def test_consumer_cannot_cancel_completed_appointment(self):
+        appointment = self.create_appointment(status="completed")
+        self.client.force_login(self.consumer)
+
+        response = self.client.post(
+            reverse("appointment_cancel", args=[appointment.pk])
+        )
+
+        self.assertRedirects(response, reverse("dashboard"))
+        appointment.refresh_from_db()
+        self.assertEqual(appointment.status, "completed")
+
+    def test_consumer_cannot_cancel_rejected_appointment(self):
+        appointment = self.create_appointment(status="rejected")
+        self.client.force_login(self.consumer)
+
+        response = self.client.post(
+            reverse("appointment_cancel", args=[appointment.pk])
+        )
+
+        self.assertRedirects(response, reverse("dashboard"))
+        appointment.refresh_from_db()
+        self.assertEqual(appointment.status, "rejected")
+
+    def test_cancel_endpoint_rejects_get_requests(self):
+        appointment = self.create_appointment(status="pending")
+        self.client.force_login(self.consumer)
+
+        response = self.client.get(
+            reverse("appointment_cancel", args=[appointment.pk])
+        )
+
+        self.assertEqual(response.status_code, 405)
+        appointment.refresh_from_db()
+        self.assertEqual(appointment.status, "pending")
+
+    # ---------------------------------------------------------
+    # Appointment status transition tests
+    # ---------------------------------------------------------
+
+    def test_cancelled_appointment_cannot_be_approved(self):
+        appointment = self.create_appointment(status="cancelled")
+        self.client.force_login(self.dietitian)
+
+        response = self.client.post(
+            reverse("appointment_status", args=[appointment.pk]),
+            {"status": "approved"},
+        )
+
+        self.assertRedirects(response, reverse("dashboard"))
+        appointment.refresh_from_db()
+        self.assertEqual(appointment.status, "cancelled")
+
+    def test_cancelled_appointment_cannot_be_completed(self):
+        appointment = self.create_appointment(status="cancelled")
+        self.client.force_login(self.dietitian)
+
+        response = self.client.post(
+            reverse("appointment_complete", args=[appointment.pk])
+        )
+
+        self.assertRedirects(response, reverse("dashboard"))
+        appointment.refresh_from_db()
+        self.assertEqual(appointment.status, "cancelled")
+
+    # ---------------------------------------------------------
+    # Appointment form validation tests
+    # ---------------------------------------------------------
+
+    def test_form_rejects_past_appointment_time(self):
+        past_time = (
+            timezone.localtime(timezone.now()) - timedelta(days=1)
+        ).strftime("%Y-%m-%dT%H:%M")
+
+        form = AppointmentRequestForm(
+            data={
+                "dietitian": self.dietitian.pk,
+                "scheduled_at": past_time,
+                "reason": "I need nutrition advice.",
+            }
+        )
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("scheduled_at", form.errors)
+
+    def test_form_rejects_empty_reason(self):
+        form = AppointmentRequestForm(
+            data={
+                "dietitian": self.dietitian.pk,
+                "scheduled_at": self.start_time.strftime("%Y-%m-%dT%H:%M"),
+                "reason": "",
+            }
+        )
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("reason", form.errors)
+
+    def test_form_rejects_whitespace_only_reason(self):
+        form = AppointmentRequestForm(
+            data={
+                "dietitian": self.dietitian.pk,
+                "scheduled_at": self.start_time.strftime("%Y-%m-%dT%H:%M"),
+                "reason": "    ",
+            }
+        )
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("reason", form.errors)
+
+    def test_form_excludes_inactive_dietitians(self):
+        self.dietitian.is_active = False
+        self.dietitian.save(update_fields=["is_active"])
+
+        form = AppointmentRequestForm(
+            data={
+                "dietitian": self.dietitian.pk,
+                "scheduled_at": self.start_time.strftime("%Y-%m-%dT%H:%M"),
+                "reason": "I need nutrition advice.",
+            }
+        )
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("dietitian", form.errors)
