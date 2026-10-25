@@ -199,48 +199,69 @@ class AppointmentSchedulingTests(TestCase):
         self.client.force_login(self.consumer)
 
         response = self.client.post(
-            reverse("appointment_cancel", args=[appointment.pk])
+            reverse("appointment_cancel", args=[appointment.pk]),
+            {"cancellation_reason": "Schedule conflict"},
         )
 
         self.assertRedirects(response, reverse("dashboard"))
         appointment.refresh_from_db()
         self.assertEqual(appointment.status, "cancelled")
+        self.assertEqual(
+            appointment.cancellation_reason, "Schedule conflict"
+        )
+        self.assertEqual(appointment.cancelled_by, self.consumer)
 
     def test_consumer_can_cancel_own_approved_appointment(self):
         appointment = self.create_appointment(status="approved")
         self.client.force_login(self.consumer)
 
         response = self.client.post(
-            reverse("appointment_cancel", args=[appointment.pk])
+            reverse("appointment_cancel", args=[appointment.pk]),
+            {"cancellation_reason": "Unable to attend"},
         )
 
         self.assertRedirects(response, reverse("dashboard"))
         appointment.refresh_from_db()
         self.assertEqual(appointment.status, "cancelled")
+        self.assertEqual(
+            appointment.cancellation_reason, "Unable to attend"
+        )
+        self.assertEqual(appointment.cancelled_by, self.consumer)
 
     def test_dietitian_can_cancel_assigned_pending_appointment(self):
         appointment = self.create_appointment(status="pending")
         self.client.force_login(self.dietitian)
 
         response = self.client.post(
-            reverse("appointment_cancel", args=[appointment.pk])
+            reverse("appointment_cancel", args=[appointment.pk]),
+            {"cancellation_reason": "Scheduling unavailable"},
         )
 
         self.assertRedirects(response, reverse("dashboard"))
         appointment.refresh_from_db()
         self.assertEqual(appointment.status, "cancelled")
+        self.assertEqual(
+            appointment.cancellation_reason, "Scheduling unavailable"
+        )
+        self.assertEqual(appointment.cancelled_by, self.dietitian)
 
     def test_dietitian_can_cancel_assigned_approved_appointment(self):
         appointment = self.create_appointment(status="approved")
         self.client.force_login(self.dietitian)
 
         response = self.client.post(
-            reverse("appointment_cancel", args=[appointment.pk])
+            reverse("appointment_cancel", args=[appointment.pk]),
+            {"cancellation_reason": "Unexpected scheduling issue"},
         )
 
         self.assertRedirects(response, reverse("dashboard"))
         appointment.refresh_from_db()
         self.assertEqual(appointment.status, "cancelled")
+        self.assertEqual(
+            appointment.cancellation_reason,
+            "Unexpected scheduling issue",
+        )
+        self.assertEqual(appointment.cancelled_by, self.dietitian)
 
     def test_consumer_cannot_cancel_another_consumers_appointment(self):
         appointment = self.create_appointment(
@@ -250,12 +271,14 @@ class AppointmentSchedulingTests(TestCase):
         self.client.force_login(self.consumer2)
 
         response = self.client.post(
-            reverse("appointment_cancel", args=[appointment.pk])
+            reverse("appointment_cancel", args=[appointment.pk]),
+            {"cancellation_reason": "Unauthorized attempt"},
         )
 
         self.assertEqual(response.status_code, 404)
         appointment.refresh_from_db()
         self.assertEqual(appointment.status, "pending")
+        self.assertEqual(appointment.cancellation_reason, "")
 
     def test_dietitian_cannot_cancel_another_dietitians_appointment(self):
         appointment = self.create_appointment(
@@ -265,19 +288,22 @@ class AppointmentSchedulingTests(TestCase):
         self.client.force_login(self.dietitian2)
 
         response = self.client.post(
-            reverse("appointment_cancel", args=[appointment.pk])
+            reverse("appointment_cancel", args=[appointment.pk]),
+            {"cancellation_reason": "Unauthorized attempt"},
         )
 
         self.assertEqual(response.status_code, 404)
         appointment.refresh_from_db()
         self.assertEqual(appointment.status, "pending")
+        self.assertEqual(appointment.cancellation_reason, "")
 
     def test_consumer_cannot_cancel_completed_appointment(self):
         appointment = self.create_appointment(status="completed")
         self.client.force_login(self.consumer)
 
         response = self.client.post(
-            reverse("appointment_cancel", args=[appointment.pk])
+            reverse("appointment_cancel", args=[appointment.pk]),
+            {"cancellation_reason": "Too late to cancel"},
         )
 
         self.assertRedirects(response, reverse("dashboard"))
@@ -289,12 +315,27 @@ class AppointmentSchedulingTests(TestCase):
         self.client.force_login(self.consumer)
 
         response = self.client.post(
-            reverse("appointment_cancel", args=[appointment.pk])
+            reverse("appointment_cancel", args=[appointment.pk]),
+            {"cancellation_reason": "Attempt to cancel rejected request"},
         )
 
         self.assertRedirects(response, reverse("dashboard"))
         appointment.refresh_from_db()
         self.assertEqual(appointment.status, "rejected")
+
+    def test_cancel_requires_a_reason(self):
+        appointment = self.create_appointment(status="pending")
+        self.client.force_login(self.consumer)
+
+        response = self.client.post(
+            reverse("appointment_cancel", args=[appointment.pk]),
+            {"cancellation_reason": "   "},
+        )
+
+        self.assertRedirects(response, reverse("dashboard"))
+        appointment.refresh_from_db()
+        self.assertEqual(appointment.status, "pending")
+        self.assertEqual(appointment.cancellation_reason, "")
 
     def test_cancel_endpoint_rejects_get_requests(self):
         appointment = self.create_appointment(status="pending")
@@ -336,6 +377,38 @@ class AppointmentSchedulingTests(TestCase):
         self.assertRedirects(response, reverse("dashboard"))
         appointment.refresh_from_db()
         self.assertEqual(appointment.status, "cancelled")
+
+    def test_dietitian_rejection_requires_a_reason(self):
+        appointment = self.create_appointment(status="pending")
+        self.client.force_login(self.dietitian)
+
+        response = self.client.post(
+            reverse("appointment_status", args=[appointment.pk]),
+            {"status": "rejected", "rejection_reason": "   "},
+        )
+
+        self.assertRedirects(response, reverse("dashboard"))
+        appointment.refresh_from_db()
+        self.assertEqual(appointment.status, "pending")
+        self.assertEqual(appointment.rejection_reason, "")
+
+    def test_dietitian_can_reject_request_with_a_reason(self):
+        appointment = self.create_appointment(status="pending")
+        self.client.force_login(self.dietitian)
+        reason = "I am unavailable at the requested time."
+
+        response = self.client.post(
+            reverse("appointment_status", args=[appointment.pk]),
+            {
+                "status": "rejected",
+                "rejection_reason": reason,
+            },
+        )
+
+        self.assertRedirects(response, reverse("dashboard"))
+        appointment.refresh_from_db()
+        self.assertEqual(appointment.status, "rejected")
+        self.assertEqual(appointment.rejection_reason, reason)
 
     # ---------------------------------------------------------
     # Appointment form validation tests

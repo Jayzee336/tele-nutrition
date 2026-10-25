@@ -102,12 +102,11 @@ def dashboard_view(request):
         user=request.user,
     )
 
-    
     # DIETITIAN DASHBOARD
     if profile.role == UserProfile.DIETITIAN:
         appointments = (
             Appointment.objects.filter(dietitian=request.user)
-            .select_related("consumer")
+            .select_related("consumer", "cancelled_by")
             .prefetch_related("consultation_note")
             .order_by("scheduled_at")
         )
@@ -162,7 +161,7 @@ def dashboard_view(request):
 
     appointments = (
         Appointment.objects.filter(consumer=request.user)
-        .select_related("dietitian")
+        .select_related("dietitian", "cancelled_by")
         .prefetch_related("consultation_note")
         .order_by("-scheduled_at")
     )
@@ -301,6 +300,21 @@ def appointment_status_view(request, appointment_id):
         )
         return redirect("dashboard")
 
+    rejection_reason = ""
+
+    if new_status == "rejected":
+        rejection_reason = request.POST.get(
+            "rejection_reason",
+            "",
+        ).strip()
+
+        if not rejection_reason:
+            messages.error(
+                request,
+                "Please provide a reason for rejecting this request.",
+            )
+            return redirect("dashboard")
+
     with transaction.atomic():
         appointment = get_object_or_404(
             Appointment.objects.select_for_update(),
@@ -337,8 +351,15 @@ def appointment_status_view(request, appointment_id):
                 )
                 return redirect("dashboard")
 
-        appointment.status = new_status
-        appointment.save(update_fields=["status"])
+            appointment.status = "approved"
+            appointment.save(update_fields=["status"])
+
+        else:
+            appointment.status = "rejected"
+            appointment.rejection_reason = rejection_reason
+            appointment.save(
+                update_fields=["status", "rejection_reason"],
+            )
 
     if new_status == "approved":
         messages.success(
@@ -354,6 +375,7 @@ def appointment_status_view(request, appointment_id):
     return redirect("dashboard")
 
 
+
 @login_required
 @require_POST
 def appointment_cancel_view(request, appointment_id):
@@ -361,14 +383,11 @@ def appointment_cancel_view(request, appointment_id):
         user=request.user,
     )
 
-    # Consumers can cancel only their own appointments.
+    # Determine which appointments the current user may access.
     if profile.role == UserProfile.CONSUMER:
         ownership_filter = models.Q(consumer=request.user)
-
-    # Dietitians can cancel only appointments assigned to them.
     elif profile.role == UserProfile.DIETITIAN:
         ownership_filter = models.Q(dietitian=request.user)
-
     else:
         messages.error(
             request,
@@ -391,8 +410,29 @@ def appointment_cancel_view(request, appointment_id):
             )
             return redirect("dashboard")
 
+        cancellation_reason = request.POST.get(
+            "cancellation_reason",
+            "",
+        ).strip()
+
+        if not cancellation_reason:
+            messages.error(
+                request,
+                "Please provide a reason for cancelling the appointment.",
+            )
+            return redirect("dashboard")
+
         appointment.status = "cancelled"
-        appointment.save(update_fields=["status"])
+        appointment.cancellation_reason = cancellation_reason
+        appointment.cancelled_by = request.user
+
+        appointment.save(
+            update_fields=[
+                "status",
+                "cancellation_reason",
+                "cancelled_by",
+            ],
+        )
 
     messages.success(
         request,

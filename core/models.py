@@ -45,9 +45,21 @@ class MealLog(models.Model):
     food_name = models.CharField(max_length=200)
     details = models.TextField(blank=True)
     calories = models.PositiveIntegerField(default=0)
-    protein = models.DecimalField(max_digits=7, decimal_places=2, default=0)
-    carbohydrates = models.DecimalField(max_digits=7, decimal_places=2, default=0)
-    fats = models.DecimalField(max_digits=7, decimal_places=2, default=0)
+    protein = models.DecimalField(
+        max_digits=7,
+        decimal_places=2,
+        default=0,
+    )
+    carbohydrates = models.DecimalField(
+        max_digits=7,
+        decimal_places=2,
+        default=0,
+    )
+    fats = models.DecimalField(
+        max_digits=7,
+        decimal_places=2,
+        default=0,
+    )
     logged_at = models.DateTimeField(auto_now_add=True)
     meal_date = models.DateField()
 
@@ -79,12 +91,39 @@ class Appointment(models.Model):
     )
     scheduled_at = models.DateTimeField()
     reason = models.TextField()
+
     status = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES,
         default="pending",
     )
-    room_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+
+    # Reason provided when an appointment is cancelled.
+    cancellation_reason = models.TextField(
+        blank=True,
+        default="",
+    )
+
+    # Reason provided by the dietitian when rejecting a request.
+    rejection_reason = models.TextField(
+        blank=True,
+        default="",
+    )
+
+    # Records who cancelled the appointment, if applicable.
+    cancelled_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="cancelled_appointments",
+    )
+
+    room_id = models.UUIDField(
+        default=uuid.uuid4,
+        unique=True,
+        editable=False,
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
