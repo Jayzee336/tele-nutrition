@@ -298,6 +298,18 @@
                                 <p class="consumer-appointment-reason">
                                     {{ appointment.reason|default:"General consultation"|truncatechars:100 }}
                                 </p>
+
+                                {% if appointment.status == "cancelled" and appointment.cancellation_reason %}
+                                    <p class="consumer-appointment-feedback">
+                                        <strong>Cancellation reason:</strong>
+                                        {{ appointment.cancellation_reason }}
+                                    </p>
+                                {% elif appointment.status == "rejected" and appointment.rejection_reason %}
+                                    <p class="consumer-appointment-feedback">
+                                        <strong>Dietitian's reason:</strong>
+                                        {{ appointment.rejection_reason }}
+                                    </p>
+                                {% endif %}
                             </div>
                         </div>
 
@@ -311,13 +323,23 @@
 
                                 <form method="post"
                                       action="{% url 'appointment_cancel' appointment.id %}"
-                                      data-confirm="Are you sure you want to cancel this approved consultation?"
+                                      class="consumer-cancel-form"
+                                      data-confirm="Are you sure you want to cancel this approved consultation? Your cancellation reason will be recorded."
                                       data-confirm-title="Cancel consultation?"
                                       data-confirm-button="Yes, cancel"
                                       data-confirm-variant="danger">
                                     {% csrf_token %}
-                                    <button type="submit" class="consumer-action-button consumer-action-danger">
-                                        Cancel
+
+                                    <!-- Hidden fallback field; the modal supplies its value. -->
+                                    <input
+                                        type="hidden"
+                                        name="cancellation_reason"
+                                        value=""
+                                    >
+
+                                    <button type="submit"
+                                            class="consumer-action-button consumer-action-danger">
+                                        Cancel consultation
                                     </button>
                                 </form>
 
@@ -329,12 +351,22 @@
 
                                 <form method="post"
                                       action="{% url 'appointment_cancel' appointment.id %}"
-                                      data-confirm="Are you sure you want to cancel this consultation request?"
+                                      class="consumer-cancel-form"
+                                      data-confirm="Are you sure you want to cancel this consultation request? Your cancellation reason will be recorded."
                                       data-confirm-title="Cancel request?"
                                       data-confirm-button="Yes, cancel"
                                       data-confirm-variant="danger">
                                     {% csrf_token %}
-                                    <button type="submit" class="consumer-action-button consumer-action-danger">
+
+                                    <!-- Hidden fallback field; the modal supplies its value. -->
+                                    <input
+                                        type="hidden"
+                                        name="cancellation_reason"
+                                        value=""
+                                    >
+
+                                    <button type="submit"
+                                            class="consumer-action-button consumer-action-danger">
                                         Cancel request
                                     </button>
                                 </form>
@@ -400,7 +432,6 @@
         --cd-forest: #234635;
         --cd-muted: #718075;
         --cd-border: #e3eae0;
-        --cd-bg: #f7f9f5;
 
         width: 100%;
         max-width: 1200px;
@@ -471,9 +502,7 @@
         line-height: 1.15;
     }
 
-    .consumer-title-period {
-        color: var(--cd-green);
-    }
+    .consumer-title-period { color: var(--cd-green); }
 
     .consumer-welcome-content > p {
         max-width: 560px;
@@ -551,15 +580,8 @@
         border-radius: 50%;
     }
 
-    .consumer-art-orbit-one {
-        width: 190px;
-        height: 190px;
-    }
-
-    .consumer-art-orbit-two {
-        width: 145px;
-        height: 145px;
-    }
+    .consumer-art-orbit-one { width: 190px; height: 190px; }
+    .consumer-art-orbit-two { width: 145px; height: 145px; }
 
     .consumer-art-circle {
         display: grid;
@@ -596,24 +618,12 @@
         white-space: nowrap;
     }
 
-    .consumer-art-chip span {
-        color: var(--cd-green);
-    }
-
-    .consumer-art-chip-top {
-        top: 15px;
-        right: 0;
-    }
-
-    .consumer-art-chip-bottom {
-        bottom: 15px;
-        left: 0;
-    }
+    .consumer-art-chip span { color: var(--cd-green); }
+    .consumer-art-chip-top { top: 15px; right: 0; }
+    .consumer-art-chip-bottom { bottom: 15px; left: 0; }
 
     /* Section headings */
-    .consumer-section {
-        margin-bottom: 37px;
-    }
+    .consumer-section { margin-bottom: 37px; }
 
     .consumer-section-heading {
         display: flex;
@@ -704,35 +714,12 @@
         font-weight: 800;
     }
 
-    .consumer-icon-green {
-        background: #e5f0df;
-        color: #467650;
-    }
-
-    .consumer-icon-peach {
-        background: #fcebdd;
-        color: #b47747;
-    }
-
-    .consumer-icon-lavender {
-        background: #eee8fb;
-        color: #7961aa;
-    }
-
-    .consumer-icon-blue {
-        background: #e5effb;
-        color: #4c78a7;
-    }
-
-    .consumer-icon-rose {
-        background: #fbe9ec;
-        color: #b45e70;
-    }
-
-    .consumer-icon-gold {
-        background: #fbf1d7;
-        color: #a98430;
-    }
+    .consumer-icon-green { background: #e5f0df; color: #467650; }
+    .consumer-icon-peach { background: #fcebdd; color: #b47747; }
+    .consumer-icon-lavender { background: #eee8fb; color: #7961aa; }
+    .consumer-icon-blue { background: #e5effb; color: #4c78a7; }
+    .consumer-icon-rose { background: #fbe9ec; color: #b45e70; }
+    .consumer-icon-gold { background: #fbf1d7; color: #a98430; }
 
     .consumer-stat-tag {
         color: #93a095;
@@ -838,19 +825,10 @@
         font-size: 1.35rem;
     }
 
-    .consumer-panel-icon-green {
-        background: #edf5e9;
-        color: var(--cd-green);
-    }
+    .consumer-panel-icon-green { background: #edf5e9; color: var(--cd-green); }
+    .consumer-panel-icon-lavender { background: #f0ebfa; color: #7964a5; }
 
-    .consumer-panel-icon-lavender {
-        background: #f0ebfa;
-        color: #7964a5;
-    }
-
-    .consumer-panel-header h2 {
-        font-size: 1.24rem;
-    }
+    .consumer-panel-header h2 { font-size: 1.24rem; }
 
     .consumer-panel-description {
         margin: 6px 0 0;
@@ -880,9 +858,7 @@
         font-size: 0.82rem;
     }
 
-    .consumer-table thead {
-        background: #fafbf8;
-    }
+    .consumer-table thead { background: #fafbf8; }
 
     .consumer-table th {
         padding: 13px 17px;
@@ -901,17 +877,9 @@
         vertical-align: middle;
     }
 
-    .consumer-table tbody tr:last-child td {
-        border-bottom: 0;
-    }
-
-    .consumer-table tbody tr {
-        transition: background-color 130ms ease;
-    }
-
-    .consumer-table tbody tr:hover {
-        background: #fbfcf9;
-    }
+    .consumer-table tbody tr:last-child td { border-bottom: 0; }
+    .consumer-table tbody tr { transition: background-color 130ms ease; }
+    .consumer-table tbody tr:hover { background: #fbfcf9; }
 
     .consumer-date-cell {
         min-width: 105px;
@@ -985,13 +953,8 @@
         transition: background-color 140ms ease;
     }
 
-    .consumer-appointment-card:last-child {
-        border-bottom: 0;
-    }
-
-    .consumer-appointment-card:hover {
-        background: #fcfdfb;
-    }
+    .consumer-appointment-card:last-child { border-bottom: 0; }
+    .consumer-appointment-card:hover { background: #fcfdfb; }
 
     .consumer-appointment-main {
         display: flex;
@@ -1014,9 +977,7 @@
         font-weight: 800;
     }
 
-    .consumer-appointment-details {
-        min-width: 0;
-    }
+    .consumer-appointment-details { min-width: 0; }
 
     .consumer-appointment-title-row {
         display: flex;
@@ -1095,15 +1056,11 @@
         line-height: 1.6;
     }
 
-    .consumer-appointment-date > span[aria-hidden="true"] {
-        color: #83a184;
-    }
+    .consumer-appointment-date > span[aria-hidden="true"] { color: #83a184; }
+    .consumer-date-separator { color: #b0bbb0; }
 
-    .consumer-date-separator {
-        color: #b0bbb0;
-    }
-
-    .consumer-appointment-reason {
+    .consumer-appointment-reason,
+    .consumer-appointment-feedback {
         margin: 7px 0 0;
         color: #879287;
         font-size: 0.79rem;
@@ -1111,19 +1068,43 @@
         overflow-wrap: anywhere;
     }
 
+    .consumer-appointment-feedback {
+        padding: 9px 11px;
+        border: 1px solid #e3eae0;
+        border-radius: 9px;
+        background: #f8faf6;
+        color: #536b58;
+    }
+
+    .consumer-appointment-feedback strong { color: #365f48; }
+
     .consumer-appointment-actions {
         display: flex;
         flex-shrink: 0;
-        align-items: center;
+        align-items: flex-start;
         justify-content: flex-end;
         flex-wrap: wrap;
         gap: 8px;
     }
 
-    .consumer-appointment-actions form {
-        margin: 0;
+    .consumer-appointment-actions form { margin: 0; }
+
+    /*
+     * Cancellation forms must never display an inline text field.
+     * The shared confirmation modal in base.html collects the reason.
+     */
+    .consumer-cancel-form {
+        display: flex;
+        flex-direction: column;
+        gap: 9px;
+        width: min(100%, 285px);
     }
 
+    .consumer-cancel-form [name="cancellation_reason"] {
+        display: none !important;
+    }
+
+    /* Action buttons */
     .consumer-action-button {
         display: inline-flex;
         min-height: 37px;
@@ -1240,22 +1221,19 @@
         line-height: 1.7;
     }
 
-    .consumer-dashboard-footer strong {
-        color: #4f7056;
-    }
+    .consumer-dashboard-footer strong { color: #4f7056; }
 
     /* Keyboard accessibility */
     .consumer-dashboard a:focus-visible,
-    .consumer-dashboard button:focus-visible {
+    .consumer-dashboard button:focus-visible,
+    .consumer-dashboard textarea:focus-visible {
         outline: 3px solid rgba(71, 121, 93, 0.3);
         outline-offset: 3px;
     }
 
     /* Responsive layouts */
     @media (max-width: 950px) {
-        .consumer-welcome {
-            padding: 29px;
-        }
+        .consumer-welcome { padding: 29px; }
 
         .consumer-welcome-art {
             flex-basis: 200px;
@@ -1264,9 +1242,7 @@
             transform-origin: center right;
         }
 
-        .consumer-stats-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
+        .consumer-stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
         .consumer-appointment-card {
             align-items: flex-start;
@@ -1275,15 +1251,15 @@
         }
 
         .consumer-appointment-actions {
+            width: 100%;
             justify-content: flex-start;
-            padding-left: 60px;
         }
+
+        .consumer-cancel-form { width: min(100%, 420px); }
     }
 
     @media (max-width: 650px) {
-        .consumer-dashboard {
-            padding-top: 3px;
-        }
+        .consumer-dashboard { padding-top: 3px; }
 
         .consumer-welcome {
             min-height: 0;
@@ -1291,21 +1267,12 @@
             border-radius: 19px;
         }
 
-        .consumer-welcome-content {
-            max-width: none;
-        }
+        .consumer-welcome-content { max-width: none; }
 
-        .consumer-welcome h1 {
-            font-size: clamp(1.85rem, 8vw, 2.35rem);
-        }
+        .consumer-welcome h1 { font-size: clamp(1.85rem, 8vw, 2.35rem); }
 
-        .consumer-welcome-content > p {
-            font-size: 0.9rem;
-        }
-
-        .consumer-welcome-art {
-            display: none;
-        }
+        .consumer-welcome-content > p { font-size: 0.9rem; }
+        .consumer-welcome-art { display: none; }
 
         .consumer-welcome-actions {
             align-items: stretch;
@@ -1313,21 +1280,11 @@
         }
 
         .consumer-welcome-actions .consumer-primary-action,
-        .consumer-welcome-actions .consumer-secondary-action {
-            width: 100%;
-        }
+        .consumer-welcome-actions .consumer-secondary-action { width: 100%; }
 
-        .consumer-section {
-            margin-bottom: 29px;
-        }
-
-        .consumer-section-heading h2 {
-            font-size: 1.28rem;
-        }
-
-        .consumer-stats-grid {
-            gap: 11px;
-        }
+        .consumer-section { margin-bottom: 29px; }
+        .consumer-section-heading h2 { font-size: 1.28rem; }
+        .consumer-stats-grid { gap: 11px; }
 
         .consumer-stat-card {
             padding: 15px;
@@ -1341,21 +1298,10 @@
             border-radius: 11px;
         }
 
-        .consumer-stat-topline {
-            margin-bottom: 13px;
-        }
-
-        .consumer-stat-number {
-            font-size: clamp(1.35rem, 6vw, 1.8rem);
-        }
-
-        .consumer-stat-tag {
-            font-size: 0.56rem;
-        }
-
-        .consumer-stat-caption {
-            font-size: 0.71rem;
-        }
+        .consumer-stat-topline { margin-bottom: 13px; }
+        .consumer-stat-number { font-size: clamp(1.35rem, 6vw, 1.8rem); }
+        .consumer-stat-tag { font-size: 0.56rem; }
+        .consumer-stat-caption { font-size: 0.71rem; }
 
         .consumer-panel {
             margin-bottom: 20px;
@@ -1380,34 +1326,17 @@
             border-radius: 12px;
         }
 
-        .consumer-panel-header h2 {
-            font-size: 1.13rem;
-        }
-
-        .consumer-panel-description {
-            font-size: 0.79rem;
-        }
-
-        .consumer-outline-button {
-            width: 100%;
-        }
-
-        .consumer-table {
-            min-width: 700px;
-        }
+        .consumer-panel-header h2 { font-size: 1.13rem; }
+        .consumer-panel-description { font-size: 0.79rem; }
+        .consumer-outline-button { width: 100%; }
+        .consumer-table { min-width: 700px; }
 
         .consumer-table th,
-        .consumer-table td {
-            padding: 13px 14px;
-        }
+        .consumer-table td { padding: 13px 14px; }
 
-        .consumer-appointment-card {
-            padding: 19px 16px;
-        }
+        .consumer-appointment-card { padding: 19px 16px; }
 
-        .consumer-appointment-main {
-            gap: 11px;
-        }
+        .consumer-appointment-main { gap: 11px; }
 
         .consumer-dietitian-avatar {
             flex-basis: 40px;
@@ -1422,22 +1351,12 @@
             gap: 7px;
         }
 
-        .consumer-appointment-actions {
-            width: 100%;
-            padding-left: 0;
-        }
+        .consumer-appointment-actions { width: 100%; }
+        .consumer-cancel-form { width: 100%; }
+        .consumer-cancel-form .consumer-action-button { width: 100%; }
+        .consumer-action-button { min-height: 40px; }
 
-        .consumer-appointment-actions form {
-            display: flex;
-        }
-
-        .consumer-action-button {
-            min-height: 40px;
-        }
-
-        .consumer-empty-state {
-            padding: 32px 18px;
-        }
+        .consumer-empty-state { padding: 32px 18px; }
 
         .consumer-dashboard-footer {
             align-items: flex-start;

@@ -7,7 +7,7 @@
     <meta name="theme-color" content="#f7f8f3">
     <meta name="description" content="NutriConnect connects people with nutrition professionals for personalized nutrition guidance and wellness support.">
 
-    <title>{% block title %}NutriConnect | Nutrition & Wellness{% endblock %}</title>
+    <title>{% block title %}NutriConnect | Nutrition &amp; Wellness{% endblock %}</title>
 
     <link rel="stylesheet" href="{% static 'css/nutriconnect.css' %}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -233,11 +233,8 @@
             text-decoration: none;
             white-space: nowrap;
             cursor: pointer;
-            transition:
-                background 180ms ease,
-                color 180ms ease,
-                border-color 180ms ease,
-                box-shadow 180ms ease,
+            transition: background 180ms ease, color 180ms ease,
+                border-color 180ms ease, box-shadow 180ms ease,
                 transform 180ms ease;
         }
 
@@ -258,8 +255,6 @@
             color: var(--nc-forest);
         }
 
-        /* Secondary action: Sign in */
-
         .app-nav-link {
             border-color: #dce6d9;
             background: #fff;
@@ -275,16 +270,13 @@
             box-shadow: 0 5px 13px rgba(35, 70, 53, .075);
         }
 
-        /* Primary action: Create account */
-
         .app-nav-cta {
             padding-right: 15px;
             padding-left: 20px;
             border-color: #47795d;
             background: linear-gradient(135deg, #528464 0%, #3d6d50 100%);
             color: #fff;
-            box-shadow:
-                0 4px 10px rgba(54, 95, 72, .16),
+            box-shadow: 0 4px 10px rgba(54, 95, 72, .16),
                 inset 0 1px 0 rgba(255, 255, 255, .13);
         }
 
@@ -465,7 +457,7 @@
             text-align: center;
         }
 
-        /* Confirmation modal */
+        /* Shared modal styles */
 
         .nc-modal[hidden] {
             display: none !important;
@@ -569,6 +561,7 @@
             font-size: .92rem;
             line-height: 1.75;
             white-space: pre-line;
+            overflow-wrap: anywhere;
         }
 
         .nc-modal-actions {
@@ -632,7 +625,8 @@
             background: #893a33;
         }
 
-        .nc-modal-symbol-danger {
+        .nc-modal-symbol-danger,
+        .nc-modal-symbol-error {
             border-color: #f0d8d4;
             background: #fff0ed;
             color: #a84940;
@@ -644,6 +638,12 @@
             color: #347044;
         }
 
+        .nc-modal-symbol-warning {
+            border-color: #f0e3bf;
+            background: #fff8e7;
+            color: #87651b;
+        }
+
         .nc-modal-footnote {
             margin: 17px 0 0;
             color: #98a096;
@@ -652,7 +652,51 @@
             text-align: center;
         }
 
-        /* Animations */
+        /* Reason field inside confirmation modal */
+
+        .nc-modal-reason-field {
+            margin-top: 20px;
+        }
+
+        .nc-modal-reason-field[hidden] {
+            display: none !important;
+        }
+
+        .nc-modal-reason-field label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--nc-forest);
+            font-size: .86rem;
+            font-weight: 750;
+        }
+
+        .nc-modal-reason-field textarea {
+            display: block;
+            width: 100%;
+            min-height: 110px;
+            box-sizing: border-box;
+            padding: 12px 14px;
+            border: 1px solid #dce6d9;
+            border-radius: 12px;
+            background: #fcfdfb;
+            color: var(--nc-text);
+            font: inherit;
+            font-size: .88rem;
+            line-height: 1.6;
+            resize: vertical;
+        }
+
+        .nc-modal-reason-field textarea:focus {
+            outline: 3px solid rgba(71, 121, 93, .18);
+            border-color: var(--nc-green);
+        }
+
+        .nc-modal-reason-field p {
+            margin: 7px 0 0;
+            color: var(--nc-muted);
+            font-size: .74rem;
+            line-height: 1.5;
+        }
 
         @keyframes nc-fade-in {
             from { opacity: 0; }
@@ -669,8 +713,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Responsive navigation and footer */
-
         @media (max-width: 760px) {
             .app-nav {
                 width: calc(100% - 28px);
@@ -678,9 +720,7 @@
                 gap: 12px;
             }
 
-            .app-brand {
-                gap: 9px;
-            }
+            .app-brand { gap: 9px; }
 
             .app-brand-mark {
                 width: 40px;
@@ -694,22 +734,12 @@
                 height: 33px;
             }
 
-            .app-brand-name {
-                font-size: 1.04rem;
-            }
-
-            .app-brand-caption {
-                font-size: .61rem;
-            }
-
-            .app-nav-right {
-                gap: 9px;
-            }
+            .app-brand-name { font-size: 1.04rem; }
+            .app-brand-caption { font-size: .61rem; }
+            .app-nav-right { gap: 9px; }
 
             .app-user-copy,
-            .app-nav-divider {
-                display: none;
-            }
+            .app-nav-divider { display: none; }
 
             .app-user-avatar {
                 width: 35px;
@@ -723,9 +753,7 @@
                 padding: 0;
             }
 
-            .app-logout-button span {
-                display: none;
-            }
+            .app-logout-button span { display: none; }
 
             .app-nav-link,
             .app-nav-cta {
@@ -745,9 +773,7 @@
                 height: 19px;
             }
 
-            .app-messages {
-                width: calc(100% - 28px);
-            }
+            .app-messages { width: calc(100% - 28px); }
 
             .app-footer-inner {
                 flex-wrap: wrap;
@@ -762,13 +788,8 @@
         }
 
         @media (max-width: 420px) {
-            .app-brand-caption {
-                display: none;
-            }
-
-            .app-brand-name {
-                font-size: .94rem;
-            }
+            .app-brand-caption { display: none; }
+            .app-brand-name { font-size: .94rem; }
 
             .app-brand-mark {
                 width: 35px;
@@ -786,9 +807,7 @@
                 gap: 6px;
             }
 
-            .app-nav-right {
-                gap: 6px;
-            }
+            .app-nav-right { gap: 6px; }
 
             .app-nav-link,
             .app-nav-cta {
@@ -797,9 +816,7 @@
                 font-size: .74rem;
             }
 
-            .app-nav-cta {
-                gap: 5px;
-            }
+            .app-nav-cta { gap: 5px; }
 
             .app-nav-cta span {
                 width: 17px;
@@ -807,32 +824,22 @@
                 font-size: .75rem;
             }
 
-            .nc-modal {
-                padding: 14px;
-            }
+            .nc-modal { padding: 14px; }
 
             .nc-modal-dialog {
                 padding: 27px 21px 23px;
                 border-radius: 20px;
             }
 
-            .nc-modal-title {
-                font-size: 1.45rem;
-            }
+            .nc-modal-title { font-size: 1.45rem; }
 
-            .nc-modal-actions {
-                flex-direction: column-reverse;
-            }
+            .nc-modal-actions { flex-direction: column-reverse; }
 
-            .nc-modal-button {
-                width: 100%;
-            }
+            .nc-modal-button { width: 100%; }
         }
 
         @media (prefers-reduced-motion: reduce) {
-            html {
-                scroll-behavior: auto;
-            }
+            html { scroll-behavior: auto; }
 
             *,
             *::before,
@@ -891,13 +898,9 @@
                         </button>
                     </form>
                 {% else %}
-                    <a class="app-nav-link" href="{% url 'login' %}">
-                        Sign in
-                    </a>
-
+                    <a class="app-nav-link" href="{% url 'login' %}">Sign in</a>
                     <a class="app-nav-cta" href="{% url 'register' %}">
-                        Create account
-                        <span aria-hidden="true">↗</span>
+                        Create account <span aria-hidden="true">↗</span>
                     </a>
                 {% endif %}
             </div>
@@ -909,15 +912,25 @@
             <div class="app-messages" aria-label="Notifications">
                 {% for message in messages %}
                     <div class="app-message app-message-{{ message.tags|default:'info' }}"
-                         role="{% if message.tags == 'error' %}alert{% else %}status{% endif %}">
+                         role="{% if 'error' in message.tags %}alert{% else %}status{% endif %}">
                         <span class="app-message-icon" aria-hidden="true">
-                            {% if message.tags == 'success' %}✓
-                            {% elif message.tags == 'error' %}!
-                            {% elif message.tags == 'warning' %}⚠
+                            {% if 'success' in message.tags %}✓
+                            {% elif 'error' in message.tags %}!
+                            {% elif 'warning' in message.tags %}⚠
                             {% else %}i{% endif %}
                         </span>
                         <p>{{ message }}</p>
                     </div>
+                {% endfor %}
+            </div>
+
+            <!-- Messages are also provided to JavaScript for the result modal. -->
+            <div id="django-result-messages" hidden>
+                {% for message in messages %}
+                    <div
+                        data-message-type="{% if 'success' in message.tags %}success{% elif 'error' in message.tags %}error{% elif 'warning' in message.tags %}warning{% else %}info{% endif %}"
+                        data-message-text="{{ message }}"
+                    ></div>
                 {% endfor %}
             </div>
         {% endif %}
@@ -946,49 +959,59 @@
         </p>
     </footer>
 
-    <!-- Shared accessible confirmation modal -->
+    <!-- Reusable confirmation modal -->
     <div id="confirmation-modal" class="nc-modal" hidden aria-hidden="true">
         <div class="nc-modal-backdrop" data-modal-close></div>
 
-        <section class="nc-modal-dialog"
-                 role="dialog"
-                 aria-modal="true"
+        <section class="nc-modal-dialog" role="dialog" aria-modal="true"
                  aria-labelledby="confirmation-title"
-                 aria-describedby="confirmation-description"
-                 tabindex="-1">
+                 aria-describedby="confirmation-description" tabindex="-1">
 
-            <button type="button"
-                    class="nc-modal-close"
-                    aria-label="Close confirmation dialog"
-                    data-modal-close>
+            <button type="button" class="nc-modal-close"
+                    aria-label="Close confirmation dialog" data-modal-close>
                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    <path d="M6 6L18 18M18 6L6 18" stroke="currentColor"
+                          stroke-width="1.8" stroke-linecap="round"/>
                 </svg>
             </button>
 
             <div class="nc-modal-symbol" id="confirmation-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none">
-                    <path d="M12 8V12M12 16H12.01M10.3 3.9L2.6 17.2C1.8 18.6 2.8 20.3 4.4 20.3H19.6C21.2 20.3 22.2 18.6 21.4 17.2L13.7 3.9C12.9 2.5 11.1 2.5 10.3 3.9Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 8V12M12 16H12.01M10.3 3.9L2.6 17.2C1.8 18.6 2.8 20.3 4.4 20.3H19.6C21.2 20.3 22.2 18.6 21.4 17.2L13.7 3.9C12.9 2.5 11.1 2.5 10.3 3.9Z"
+                          stroke="currentColor" stroke-width="1.7"
+                          stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
             </div>
 
             <span class="nc-modal-eyebrow">NutriConnect confirmation</span>
-
             <h2 id="confirmation-title" class="nc-modal-title">Are you sure?</h2>
 
             <p id="confirmation-description" class="nc-modal-description">
                 Please confirm that you want to continue with this action.
             </p>
 
+            <div id="confirmation-reason-field" class="nc-modal-reason-field" hidden>
+                <label id="confirmation-reason-label" for="confirmation-reason">
+                    Reason
+                </label>
+                <textarea
+                    id="confirmation-reason"
+                    rows="4"
+                    maxlength="2000"
+                    placeholder="Enter your reason..."
+                    aria-describedby="confirmation-reason-help"
+                ></textarea>
+                <p id="confirmation-reason-help">
+                    A reason is required to continue. Maximum 2,000 characters.
+                </p>
+            </div>
+
             <div class="nc-modal-actions">
-                <button type="button"
-                        id="confirmation-cancel"
+                <button type="button" id="confirmation-cancel"
                         class="nc-modal-button nc-modal-button-secondary">
                     Go back
                 </button>
-
-                <button type="button"
-                        id="confirmation-confirm"
+                <button type="button" id="confirmation-confirm"
                         class="nc-modal-button nc-modal-button-primary">
                     Confirm
                 </button>
@@ -998,125 +1021,434 @@
         </section>
     </div>
 
+    <!-- Reusable result modal -->
+    <div id="result-modal" class="nc-modal" hidden aria-hidden="true">
+        <div class="nc-modal-backdrop" data-result-close></div>
+
+        <section class="nc-modal-dialog" role="alertdialog" aria-modal="true"
+                 aria-labelledby="result-title"
+                 aria-describedby="result-description" tabindex="-1">
+
+            <button type="button" class="nc-modal-close"
+                    aria-label="Close notification" data-result-close>
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M6 6L18 18M18 6L6 18" stroke="currentColor"
+                          stroke-width="1.8" stroke-linecap="round"/>
+                </svg>
+            </button>
+
+            <div class="nc-modal-symbol" id="result-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M5 12.5L9.5 17L19 7.5" stroke="currentColor"
+                          stroke-width="2" stroke-linecap="round"
+                          stroke-linejoin="round"/>
+                </svg>
+            </div>
+
+            <span class="nc-modal-eyebrow" id="result-eyebrow">NutriConnect notification</span>
+            <h2 id="result-title" class="nc-modal-title">Action completed</h2>
+            <p id="result-description" class="nc-modal-description"></p>
+
+            <div class="nc-modal-actions">
+                <button type="button" id="result-ok"
+                        class="nc-modal-button nc-modal-button-primary">
+                    OK
+                </button>
+            </div>
+        </section>
+    </div>
+
     <script>
-        (() => {
-            const modal = document.getElementById("confirmation-modal");
-            if (!modal) return;
+    (() => {
+        "use strict";
 
-            const title = document.getElementById("confirmation-title");
-            const description = document.getElementById("confirmation-description");
-            const icon = document.getElementById("confirmation-icon");
-            const confirmButton = document.getElementById("confirmation-confirm");
-            const cancelButton = document.getElementById("confirmation-cancel");
-            const closeButton = modal.querySelector(".nc-modal-close");
+        const confirmationModal = document.getElementById("confirmation-modal");
+        const resultModal = document.getElementById("result-modal");
 
-            let formToSubmit = null;
-            let previousFocus = null;
+        if (!confirmationModal || !resultModal) return;
 
-            const setVariant = (variant) => {
-                confirmButton.classList.remove("nc-modal-button-danger");
-                icon.classList.remove("nc-modal-symbol-danger", "nc-modal-symbol-success");
+        const confirmationTitle = document.getElementById("confirmation-title");
+        const confirmationDescription = document.getElementById("confirmation-description");
+        const confirmationIcon = document.getElementById("confirmation-icon");
+        const confirmButton = document.getElementById("confirmation-confirm");
+        const cancelButton = document.getElementById("confirmation-cancel");
+        const confirmationClose = confirmationModal.querySelector(".nc-modal-close");
+        const confirmationDialog = confirmationModal.querySelector(".nc-modal-dialog");
 
-                if (variant === "danger") {
-                    confirmButton.classList.add("nc-modal-button-danger");
-                    icon.classList.add("nc-modal-symbol-danger");
-                } else if (variant === "success") {
-                    icon.classList.add("nc-modal-symbol-success");
+        const reasonField = document.getElementById("confirmation-reason-field");
+        const reasonInput = document.getElementById("confirmation-reason");
+        const reasonLabel = document.getElementById("confirmation-reason-label");
+
+        const resultTitle = document.getElementById("result-title");
+        const resultDescription = document.getElementById("result-description");
+        const resultEyebrow = document.getElementById("result-eyebrow");
+        const resultIcon = document.getElementById("result-icon");
+        const resultOk = document.getElementById("result-ok");
+        const resultDialog = resultModal.querySelector(".nc-modal-dialog");
+        const resultClose = resultModal.querySelector(".nc-modal-close");
+
+        let formToSubmit = null;
+        let sourceReasonField = null;
+        let previousFocus = null;
+        let activeModal = null;
+
+        const modalIsOpen = (modal) => modal && !modal.hidden;
+
+        const setBodyLock = (locked) => {
+            document.body.style.overflow = locked ? "hidden" : "";
+        };
+
+        const setConfirmationVariant = (variant) => {
+            confirmButton.classList.remove("nc-modal-button-danger");
+            confirmationIcon.classList.remove(
+                "nc-modal-symbol-danger",
+                "nc-modal-symbol-success",
+                "nc-modal-symbol-error",
+                "nc-modal-symbol-warning"
+            );
+
+            if (variant === "danger") {
+                confirmButton.classList.add("nc-modal-button-danger");
+                confirmationIcon.classList.add("nc-modal-symbol-danger");
+            } else if (variant === "success") {
+                confirmationIcon.classList.add("nc-modal-symbol-success");
+            } else if (variant === "error") {
+                confirmationIcon.classList.add("nc-modal-symbol-error");
+            } else if (variant === "warning") {
+                confirmationIcon.classList.add("nc-modal-symbol-warning");
+            }
+        };
+
+        const configureReasonField = (form) => {
+            sourceReasonField = null;
+            reasonInput.value = "";
+            reasonInput.required = false;
+            reasonInput.setCustomValidity("");
+            reasonField.hidden = true;
+
+            const rejectionField = form.querySelector('[name="rejection_reason"]');
+            const cancellationField = form.querySelector('[name="cancellation_reason"]');
+
+            if (rejectionField) {
+                sourceReasonField = rejectionField;
+                reasonLabel.textContent = "Reason for rejection";
+                reasonInput.placeholder =
+                    "Explain why you are rejecting this appointment...";
+            } else if (cancellationField) {
+                sourceReasonField = cancellationField;
+                reasonLabel.textContent = "Reason for cancellation";
+                reasonInput.placeholder =
+                    "Explain why you are cancelling this consultation...";
+            }
+
+            if (sourceReasonField) {
+                reasonField.hidden = false;
+                reasonInput.required = true;
+                reasonInput.value = sourceReasonField.value || "";
+            }
+        };
+
+        const openConfirmation = (form) => {
+            formToSubmit = form;
+            previousFocus = document.activeElement;
+            activeModal = confirmationModal;
+
+            confirmationTitle.textContent =
+                form.dataset.confirmTitle || "Are you sure?";
+
+            confirmationDescription.textContent =
+                form.dataset.confirm ||
+                "Please confirm that you want to continue.";
+
+            confirmButton.textContent =
+                form.dataset.confirmButton || "Confirm";
+
+            cancelButton.textContent =
+                form.dataset.cancelButton || "Go back";
+
+            setConfirmationVariant(form.dataset.confirmVariant || "default");
+            configureReasonField(form);
+
+            confirmationModal.hidden = false;
+            confirmationModal.setAttribute("aria-hidden", "false");
+            setBodyLock(true);
+
+            requestAnimationFrame(() => {
+                if (!modalIsOpen(confirmationModal)) return;
+
+                if (sourceReasonField) {
+                    reasonInput.focus();
+                } else {
+                    confirmButton.focus();
                 }
-            };
+            });
+        };
 
-            const openModal = (form) => {
-                formToSubmit = form;
-                previousFocus = document.activeElement;
+        const closeConfirmation = (restoreFocus = true) => {
+            confirmationModal.hidden = true;
+            confirmationModal.setAttribute("aria-hidden", "true");
+            formToSubmit = null;
+            sourceReasonField = null;
 
-                title.textContent = form.dataset.confirmTitle || "Are you sure?";
-                description.textContent =
-                    form.dataset.confirm || "Please confirm that you want to continue.";
-                confirmButton.textContent = form.dataset.confirmButton || "Confirm";
-                cancelButton.textContent = form.dataset.cancelButton || "Go back";
+            if (!modalIsOpen(resultModal)) {
+                activeModal = null;
+                setBodyLock(false);
+            }
 
-                setVariant(form.dataset.confirmVariant || "default");
+            if (restoreFocus && previousFocus &&
+                typeof previousFocus.focus === "function") {
+                previousFocus.focus();
+            }
+        };
 
-                modal.hidden = false;
-                modal.setAttribute("aria-hidden", "false");
-                document.body.style.overflow = "hidden";
+        const openResult = ({
+            type = "success",
+            title,
+            message,
+            eyebrow
+        } = {}) => {
+            previousFocus = document.activeElement;
+            activeModal = resultModal;
 
-                requestAnimationFrame(() => confirmButton.focus());
-            };
+            resultTitle.textContent = title || "Action completed";
+            resultDescription.textContent = message || "";
+            resultEyebrow.textContent =
+                eyebrow || "NutriConnect notification";
 
-            const closeModal = () => {
-                modal.hidden = true;
-                modal.setAttribute("aria-hidden", "true");
-                document.body.style.overflow = "";
-                formToSubmit = null;
+            resultIcon.classList.remove(
+                "nc-modal-symbol-danger",
+                "nc-modal-symbol-success",
+                "nc-modal-symbol-error",
+                "nc-modal-symbol-warning"
+            );
 
-                if (previousFocus && typeof previousFocus.focus === "function") {
-                    previousFocus.focus();
+            if (type === "error") {
+                resultIcon.classList.add("nc-modal-symbol-error");
+                resultTitle.textContent = title || "Something went wrong";
+            } else if (type === "warning") {
+                resultIcon.classList.add("nc-modal-symbol-warning");
+                resultTitle.textContent = title || "Please note";
+            } else if (type === "info") {
+                resultTitle.textContent = title || "Information";
+            } else {
+                resultIcon.classList.add("nc-modal-symbol-success");
+                resultTitle.textContent = title || "Action completed";
+            }
+
+            resultModal.hidden = false;
+            resultModal.setAttribute("aria-hidden", "false");
+            setBodyLock(true);
+
+            requestAnimationFrame(() => {
+                if (modalIsOpen(resultModal)) {
+                    resultOk.focus();
                 }
-            };
+            });
+        };
 
-            document.addEventListener("submit", (event) => {
-                const form = event.target;
+        const closeResult = () => {
+            resultModal.hidden = true;
+            resultModal.setAttribute("aria-hidden", "true");
+            activeModal = null;
+            setBodyLock(false);
 
-                if (!(form instanceof HTMLFormElement)) return;
-                if (!form.hasAttribute("data-confirm")) return;
+            if (previousFocus && typeof previousFocus.focus === "function") {
+                previousFocus.focus();
+            }
+        };
 
-                if (form.dataset.confirmApproved === "true") {
-                    delete form.dataset.confirmApproved;
+        /*
+         * Intercept forms configured for confirmation.
+         * Forms without data-confirm submit normally.
+         */
+        document.addEventListener("submit", (event) => {
+            const form = event.target;
+
+            if (!(form instanceof HTMLFormElement)) return;
+            if (!form.hasAttribute("data-confirm")) return;
+
+            if (form.dataset.confirmApproved === "true") {
+                delete form.dataset.confirmApproved;
+                return;
+            }
+
+            event.preventDefault();
+            openConfirmation(form);
+        });
+
+        confirmButton.addEventListener("click", () => {
+            if (!formToSubmit) return;
+
+            const form = formToSubmit;
+
+            if (sourceReasonField) {
+                const reason = reasonInput.value.trim();
+
+                if (!reason) {
+                    reasonInput.setCustomValidity(
+                        "Please provide a reason before continuing."
+                    );
+                    reasonInput.reportValidity();
+                    reasonInput.focus();
                     return;
                 }
 
+                if (reason.length > 2000) {
+                    reasonInput.setCustomValidity(
+                        "The reason cannot exceed 2,000 characters."
+                    );
+                    reasonInput.reportValidity();
+                    reasonInput.focus();
+                    return;
+                }
+
+                reasonInput.setCustomValidity("");
+                sourceReasonField.value = reason;
+            }
+
+            /*
+             * Validate the original form as well, including its other
+             * required fields and browser constraints.
+             */
+            if (!form.reportValidity()) return;
+
+            formToSubmit = null;
+            closeConfirmation(false);
+
+            /*
+             * Allow the confirmed form to pass the submit listener once.
+             * requestSubmit() retains native form validation and submitters.
+             */
+            form.dataset.confirmApproved = "true";
+            form.requestSubmit();
+        });
+
+        reasonInput.addEventListener("input", () => {
+            reasonInput.setCustomValidity("");
+        });
+
+        cancelButton.addEventListener("click", () => closeConfirmation());
+        confirmationClose.addEventListener("click", () => closeConfirmation());
+
+        confirmationModal.querySelectorAll("[data-modal-close]").forEach((element) => {
+            element.addEventListener("click", () => closeConfirmation());
+        });
+
+        resultOk.addEventListener("click", closeResult);
+        resultClose.addEventListener("click", closeResult);
+
+        resultModal.querySelectorAll("[data-result-close]").forEach((element) => {
+            element.addEventListener("click", closeResult);
+        });
+
+        document.addEventListener("keydown", (event) => {
+            if (!activeModal) return;
+
+            const currentModal = activeModal;
+
+            if (!modalIsOpen(currentModal)) return;
+
+            if (event.key === "Escape") {
                 event.preventDefault();
-                openModal(form);
-            });
 
-            confirmButton.addEventListener("click", () => {
-                if (!formToSubmit) return;
-
-                const form = formToSubmit;
-                formToSubmit = null;
-                closeModal();
-
-                form.dataset.confirmApproved = "true";
-                HTMLFormElement.prototype.submit.call(form);
-            });
-
-            cancelButton.addEventListener("click", closeModal);
-            closeButton.addEventListener("click", closeModal);
-
-            modal.querySelectorAll("[data-modal-close]").forEach((element) => {
-                element.addEventListener("click", closeModal);
-            });
-
-            document.addEventListener("keydown", (event) => {
-                if (modal.hidden) return;
-
-                if (event.key === "Escape") {
-                    event.preventDefault();
-                    closeModal();
-                    return;
+                if (currentModal === confirmationModal) {
+                    closeConfirmation();
+                } else {
+                    closeResult();
                 }
 
-                if (event.key === "Tab") {
-                    const focusable = [
-                        closeButton,
-                        cancelButton,
-                        confirmButton
-                    ].filter((element) => !element.disabled);
+                return;
+            }
 
-                    const first = focusable[0];
-                    const last = focusable[focusable.length - 1];
+            if (event.key !== "Tab") return;
 
-                    if (event.shiftKey && document.activeElement === first) {
-                        event.preventDefault();
-                        last.focus();
-                    } else if (!event.shiftKey && document.activeElement === last) {
-                        event.preventDefault();
-                        first.focus();
-                    }
-                }
-            });
-        })();
+            const focusable = currentModal === confirmationModal
+                ? (
+                    sourceReasonField
+                        ? [confirmationClose, reasonInput, cancelButton, confirmButton]
+                        : [confirmationClose, cancelButton, confirmButton]
+                )
+                : [resultClose, resultOk];
+
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+
+            if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault();
+                last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first.focus();
+            }
+        });
+
+        /*
+         * Read Django messages after the server redirects back to a page.
+         * The backend's message determines whether this is success or error.
+         */
+        const djangoMessages = document.querySelectorAll(
+            "#django-result-messages [data-message-text]"
+        );
+
+        if (djangoMessages.length) {
+            const latestMessage = djangoMessages[djangoMessages.length - 1];
+            const type = latestMessage.dataset.messageType || "info";
+            const message = latestMessage.dataset.messageText || "";
+
+            if (message) {
+                const titles = {
+                    success: "Action completed",
+                    error: "Something went wrong",
+                    warning: "Please note",
+                    info: "NutriConnect notification"
+                };
+
+                openResult({
+                    type,
+                    title: titles[type] || titles.info,
+                    message,
+                    eyebrow: "NutriConnect notification"
+                });
+            }
+        } else {
+            /*
+             * Optional fallback for templates that set result attributes
+             * directly on the body.
+             */
+            const resultType = document.body.dataset.resultType;
+            const resultMessage = document.body.dataset.resultMessage;
+
+            if (resultType && resultMessage) {
+                openResult({
+                    type: resultType,
+                    title: document.body.dataset.resultTitle || "",
+                    message: resultMessage,
+                    eyebrow: document.body.dataset.resultEyebrow ||
+                        "NutriConnect notification"
+                });
+            }
+        }
+
+        /*
+         * Optional helper for page-specific JavaScript.
+         */
+        window.NutriConnectModal = {
+            showResult: openResult,
+            closeResult,
+
+            showSuccess(title, message) {
+                openResult({type: "success", title, message});
+            },
+
+            showError(title, message) {
+                openResult({type: "error", title, message});
+            },
+
+            showWarning(title, message) {
+                openResult({type: "warning", title, message});
+            }
+        };
+    })();
     </script>
 
     {% block extra_js %}{% endblock %}

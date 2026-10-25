@@ -23,7 +23,7 @@ from .models import (
 )
 
 
-# Each consultation is assumed to occupy a 60-minute time slot.
+# Each consultation occupies a 60-minute time slot.
 APPOINTMENT_DURATION = timedelta(minutes=60)
 
 
@@ -53,9 +53,7 @@ def has_appointment_conflict(
     )
 
     if exclude_appointment_id is not None:
-        conflicts = conflicts.exclude(
-            pk=exclude_appointment_id,
-        )
+        conflicts = conflicts.exclude(pk=exclude_appointment_id)
 
     for existing in conflicts:
         existing_end = existing.scheduled_at + APPOINTMENT_DURATION
@@ -98,9 +96,7 @@ def register_view(request):
 
 @login_required
 def dashboard_view(request):
-    profile, _ = UserProfile.objects.get_or_create(
-        user=request.user,
-    )
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
 
     # DIETITIAN DASHBOARD
     if profile.role == UserProfile.DIETITIAN:
@@ -113,9 +109,11 @@ def dashboard_view(request):
 
         # Only show meal logs for consumers with an approved or
         # completed appointment with this dietitian.
-        patient_ids = appointments.filter(
-            status__in=["approved", "completed"],
-        ).values_list("consumer_id", flat=True).distinct()
+        patient_ids = (
+            appointments.filter(status__in=["approved", "completed"])
+            .values_list("consumer_id", flat=True)
+            .distinct()
+        )
 
         patient_meals = (
             MealLog.objects.filter(consumer_id__in=patient_ids)
@@ -125,12 +123,12 @@ def dashboard_view(request):
 
         context = {
             "appointments": appointments,
-            "pending_count": appointments.filter(
-                status="pending",
-            ).count(),
-            "patient_count": appointments.values(
-                "consumer_id",
-            ).distinct().count(),
+            "pending_count": appointments.filter(status="pending").count(),
+            "patient_count": (
+                appointments.values("consumer_id")
+                .distinct()
+                .count()
+            ),
             "patient_meals": patient_meals,
         }
 
@@ -155,9 +153,7 @@ def dashboard_view(request):
         total_fats=Sum("fats"),
     )
 
-    all_meals = MealLog.objects.filter(
-        consumer=request.user,
-    )
+    all_meals = MealLog.objects.filter(consumer=request.user)
 
     appointments = (
         Appointment.objects.filter(consumer=request.user)
@@ -186,9 +182,7 @@ def dashboard_view(request):
 
 @login_required
 def meal_create_view(request):
-    profile, _ = UserProfile.objects.get_or_create(
-        user=request.user,
-    )
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
 
     if profile.role != UserProfile.CONSUMER:
         messages.error(
@@ -222,9 +216,7 @@ def meal_create_view(request):
 
 @login_required
 def appointment_create_view(request):
-    profile, _ = UserProfile.objects.get_or_create(
-        user=request.user,
-    )
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
 
     if profile.role != UserProfile.CONSUMER:
         messages.error(
@@ -280,9 +272,7 @@ def appointment_create_view(request):
 @login_required
 @require_POST
 def appointment_status_view(request, appointment_id):
-    profile, _ = UserProfile.objects.get_or_create(
-        user=request.user,
-    )
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
 
     if profile.role != UserProfile.DIETITIAN:
         messages.error(
@@ -294,10 +284,7 @@ def appointment_status_view(request, appointment_id):
     new_status = request.POST.get("status")
 
     if new_status not in ("approved", "rejected"):
-        messages.error(
-            request,
-            "Invalid appointment status.",
-        )
+        messages.error(request, "Invalid appointment status.")
         return redirect("dashboard")
 
     rejection_reason = ""
@@ -312,6 +299,13 @@ def appointment_status_view(request, appointment_id):
             messages.error(
                 request,
                 "Please provide a reason for rejecting this request.",
+            )
+            return redirect("dashboard")
+
+        if len(rejection_reason) > 2000:
+            messages.error(
+                request,
+                "The rejection reason must be 2000 characters or fewer.",
             )
             return redirect("dashboard")
 
@@ -353,7 +347,6 @@ def appointment_status_view(request, appointment_id):
 
             appointment.status = "approved"
             appointment.save(update_fields=["status"])
-
         else:
             appointment.status = "rejected"
             appointment.rejection_reason = rejection_reason
@@ -375,13 +368,10 @@ def appointment_status_view(request, appointment_id):
     return redirect("dashboard")
 
 
-
 @login_required
 @require_POST
 def appointment_cancel_view(request, appointment_id):
-    profile, _ = UserProfile.objects.get_or_create(
-        user=request.user,
-    )
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
 
     # Determine which appointments the current user may access.
     if profile.role == UserProfile.CONSUMER:
@@ -392,6 +382,25 @@ def appointment_cancel_view(request, appointment_id):
         messages.error(
             request,
             "You are not authorized to cancel appointments.",
+        )
+        return redirect("dashboard")
+
+    cancellation_reason = request.POST.get(
+        "cancellation_reason",
+        "",
+    ).strip()
+
+    if not cancellation_reason:
+        messages.error(
+            request,
+            "Please provide a reason for cancelling the appointment.",
+        )
+        return redirect("dashboard")
+
+    if len(cancellation_reason) > 2000:
+        messages.error(
+            request,
+            "The cancellation reason must be 2000 characters or fewer.",
         )
         return redirect("dashboard")
 
@@ -407,18 +416,6 @@ def appointment_cancel_view(request, appointment_id):
             messages.warning(
                 request,
                 "Only pending or approved appointments can be cancelled.",
-            )
-            return redirect("dashboard")
-
-        cancellation_reason = request.POST.get(
-            "cancellation_reason",
-            "",
-        ).strip()
-
-        if not cancellation_reason:
-            messages.error(
-                request,
-                "Please provide a reason for cancelling the appointment.",
             )
             return redirect("dashboard")
 
@@ -465,9 +462,7 @@ def video_room_view(request, appointment_id):
         )
         return redirect("dashboard")
 
-    room_url = (
-        f"https://meet.jit.si/NutriConnect-{appointment.room_id}"
-    )
+    room_url = f"https://meet.jit.si/NutriConnect-{appointment.room_id}"
 
     return render(
         request,
@@ -481,9 +476,7 @@ def video_room_view(request, appointment_id):
 
 @login_required
 def consultation_note_view(request, appointment_id):
-    profile, _ = UserProfile.objects.get_or_create(
-        user=request.user,
-    )
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
 
     appointment = get_object_or_404(
         Appointment.objects.select_related("consumer", "dietitian"),
@@ -551,9 +544,7 @@ def consultation_note_view(request, appointment_id):
 @login_required
 @require_POST
 def appointment_complete_view(request, appointment_id):
-    profile, _ = UserProfile.objects.get_or_create(
-        user=request.user,
-    )
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
 
     if profile.role != UserProfile.DIETITIAN:
         messages.error(
@@ -603,9 +594,7 @@ def appointment_complete_view(request, appointment_id):
 
 @login_required
 def consumer_recommendations_view(request, appointment_id):
-    profile, _ = UserProfile.objects.get_or_create(
-        user=request.user,
-    )
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
 
     if profile.role != UserProfile.CONSUMER:
         messages.error(

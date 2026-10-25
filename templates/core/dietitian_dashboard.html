@@ -293,6 +293,7 @@
             font-size: .9rem;
             line-height: 1.7;
             overflow-wrap: anywhere;
+            white-space: normal;
         }
 
         .dietitian-dashboard .diet-reason-label {
@@ -370,8 +371,12 @@
         }
 
         .dietitian-dashboard .diet-actions form {
-            display: inline-flex;
-            flex-wrap: wrap;
+            display: flex;
+            flex: 0 1 auto;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 9px;
+            min-width: 0;
             margin: 0;
         }
 
@@ -663,20 +668,37 @@
                                         <span class="diet-reason-label">Consultation reason:</span>
                                         {{ appointment.reason|default:"General consultation"|truncatechars:160 }}
                                     </p>
+
+                                    {% if appointment.status == "rejected" and appointment.rejection_reason %}
+                                        <p class="diet-reason">
+                                            <span class="diet-reason-label">Rejection reason:</span>
+                                            {{ appointment.rejection_reason|linebreaksbr }}
+                                        </p>
+                                    {% endif %}
+
+                                    {% if appointment.status == "cancelled" and appointment.cancellation_reason %}
+                                        <p class="diet-reason">
+                                            <span class="diet-reason-label">Cancellation reason:</span>
+                                            {{ appointment.cancellation_reason|linebreaksbr }}
+                                        </p>
+                                    {% endif %}
                                 </div>
                             </div>
 
                             <div class="diet-actions">
                                 {% if appointment.status == "pending" %}
+
                                     <form method="post"
                                           action="{% url 'appointment_status' appointment.id %}"
                                           data-confirm="Approve this consultation request? Make sure the scheduled time works for your availability."
                                           data-confirm-title="Approve appointment?"
-                                          data-confirm-button="Approve appointment"
+                                          data-confirm-button="Yes, approve"
+                                          data-cancel-button="Go back"
                                           data-confirm-variant="success"
                                           data-confirm-icon="✓">
                                         {% csrf_token %}
                                         <input type="hidden" name="status" value="approved">
+
                                         <button type="submit" class="btn btn-primary btn-sm">
                                             Approve
                                         </button>
@@ -684,30 +706,28 @@
 
                                     <form method="post"
                                           action="{% url 'appointment_status' appointment.id %}"
-                                          data-confirm="Are you sure you want to reject this consultation request?"
-                                          data-confirm-title="Reject request?"
+                                          data-confirm="Reject this consultation request? Enter the reason in the confirmation dialog. The consumer will be able to see it."
+                                          data-confirm-title="Reject appointment?"
                                           data-confirm-button="Yes, reject"
-                                          data-confirm-variant="danger">
+                                          data-cancel-button="Go back"
+                                          data-confirm-variant="danger"
+                                          data-confirm-icon="!"
+                                          data-reason-required="true"
+                                          data-reason-field="rejection_reason"
+                                          data-reason-label="Reason for rejection"
+                                          data-reason-placeholder="Explain why this request cannot be accepted."
+                                          data-reason-maxlength="2000">
                                         {% csrf_token %}
                                         <input type="hidden" name="status" value="rejected">
+                                        <input type="hidden" name="rejection_reason" value="">
+
                                         <button type="submit" class="btn btn-danger btn-sm">
                                             Reject
                                         </button>
                                     </form>
 
-                                    <form method="post"
-                                          action="{% url 'appointment_cancel' appointment.id %}"
-                                          data-confirm="Cancel this appointment request? The consumer will no longer have this appointment."
-                                          data-confirm-title="Cancel appointment?"
-                                          data-confirm-button="Yes, cancel"
-                                          data-confirm-variant="danger">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-ghost btn-sm">
-                                            Cancel
-                                        </button>
-                                    </form>
-
                                 {% elif appointment.status == "approved" %}
+
                                     <a href="{% url 'video_room' appointment.id %}"
                                        class="btn btn-primary btn-sm">
                                         Join consultation
@@ -727,10 +747,12 @@
                                               action="{% url 'appointment_complete' appointment.id %}"
                                               data-confirm="Mark this consultation as completed? Make sure your consultation notes are saved first."
                                               data-confirm-title="Complete consultation?"
-                                              data-confirm-button="Mark completed"
+                                              data-confirm-button="Yes, mark completed"
+                                              data-cancel-button="Go back"
                                               data-confirm-variant="success"
                                               data-confirm-icon="✓">
                                             {% csrf_token %}
+
                                             <button type="submit" class="btn btn-secondary btn-sm">
                                                 Complete
                                             </button>
@@ -739,31 +761,44 @@
 
                                     <form method="post"
                                           action="{% url 'appointment_cancel' appointment.id %}"
-                                          data-confirm="Are you sure you want to cancel this approved consultation?"
+                                          data-confirm="Cancel this approved consultation? Enter the reason in the confirmation dialog. The consumer will be able to see it."
                                           data-confirm-title="Cancel consultation?"
                                           data-confirm-button="Yes, cancel"
-                                          data-confirm-variant="danger">
+                                          data-cancel-button="Go back"
+                                          data-confirm-variant="danger"
+                                          data-confirm-icon="!"
+                                          data-reason-required="true"
+                                          data-reason-field="cancellation_reason"
+                                          data-reason-label="Reason for cancellation"
+                                          data-reason-placeholder="Explain why you need to cancel this consultation."
+                                          data-reason-maxlength="2000">
                                         {% csrf_token %}
+                                        <input type="hidden" name="cancellation_reason" value="">
+
                                         <button type="submit" class="btn btn-danger btn-sm">
-                                            Cancel
+                                            Cancel consultation
                                         </button>
                                     </form>
 
                                 {% elif appointment.status == "completed" %}
+
                                     <a href="{% url 'consultation_note' appointment.id %}"
                                        class="btn btn-secondary btn-sm">
                                         View / edit notes
                                     </a>
 
                                 {% elif appointment.status == "rejected" %}
+
                                     <span class="diet-stat-help">
                                         Request rejected
                                     </span>
 
                                 {% elif appointment.status == "cancelled" %}
+
                                     <span class="diet-stat-help">
                                         Appointment cancelled
                                     </span>
+
                                 {% endif %}
                             </div>
                         </article>
