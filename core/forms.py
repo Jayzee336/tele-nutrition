@@ -14,22 +14,11 @@ from .models import (
 class RegistrationForm(UserCreationForm):
     email = forms.EmailField(required=True)
 
-    role = forms.ChoiceField(
-        choices=[
-            (UserProfile.CONSUMER, "Consumer"),
-            (UserProfile.DIETITIAN, "Dietitian"),
-        ],
-        widget=forms.Select(
-            attrs={"class": "form-control"}
-        ),
-    )
-
     class Meta:
         model = User
         fields = [
             "username",
             "email",
-            "role",
             "password1",
             "password2",
         ]
@@ -41,9 +30,11 @@ class RegistrationForm(UserCreationForm):
             user.email = self.cleaned_data["email"]
             user.save(update_fields=["email"])
 
+            # Public sign-up must never grant dietitian privileges.
+            # Administrators can promote verified accounts through Django admin.
             UserProfile.objects.create(
                 user=user,
-                role=self.cleaned_data["role"],
+                role=UserProfile.CONSUMER,
             )
 
         return user
