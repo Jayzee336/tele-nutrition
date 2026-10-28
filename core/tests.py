@@ -468,3 +468,29 @@ class AppointmentSchedulingTests(TestCase):
 
         self.assertFalse(form.is_valid())
         self.assertIn("dietitian", form.errors)
+
+class PublicRegistrationSecurityTests(TestCase):
+    """Public sign-up must not allow users to self-assign privileged roles."""
+
+    def test_registration_page_does_not_offer_a_role_selector(self):
+        response = self.client.get(reverse("register"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, 'name="role"')
+
+    def test_registration_always_creates_a_consumer_profile(self):
+        response = self.client.post(
+            reverse("register"),
+            {
+                "username": "newconsumer",
+                "email": "newconsumer@example.com",
+                "password1": "S!trongPass-9046x",
+                "password2": "S!trongPass-9046x",
+                # A crafted request must not grant dietitian privileges.
+                "role": UserProfile.DIETITIAN,
+            },
+        )
+
+        self.assertRedirects(response, reverse("dashboard"))
+        user = User.objects.get(username="newconsumer")
+        self.assertEqual(user.profile.role, UserProfile.CONSUMER)
