@@ -165,8 +165,29 @@ Before staging files, review `git status` and ensure that `.env`, database files
 - **Deployment failed:** Open the Render service's deploy/build logs and review the first error message.
 - **Local import or package errors:** Confirm the virtual environment is activated and reinstall dependencies with `python -m pip install -r requirements.txt`.
 
+## Project architecture
+
+- **Backend:** Django (Python) with a single `core` application
+- **Database:** SQLite for local development; Neon PostgreSQL (`DATABASE_URL`) for production
+- **Static files:** WhiteNoise (`CompressedManifestStaticFilesStorage`) served through `collectstatic`
+- **Hosting / deployment:** Render (`gunicorn config.wsgi:application`); build script `build.sh` runs `migrate` and `collectstatic`
+- **Application server:** Gunicorn
+- **Video conferencing:** Jitsi Meet embedded via the public `meet.jit.si` iFrame API (`external_api.js`); each approved appointment has a unique UUID-based room (`NutriConnect-<uuid>`)
+- **Privacy / security notes:** The embedded meeting uses the free public Jitsi service. It does not claim healthcare-grade confidentiality or regulatory compliance (e.g., HIPAA). Sensitive health details should be shared only as needed for the consultation. No recording is enabled through the application.
+
+## Tele-nutrition workflow supported by NutriConnect
+
+The application supports a complete connected workflow:
+
+1. **Consumer:** Register → Log in → Log meals → Request consultation → View appointment status → Join approved virtual session → Receive consultation notes/recommendations.
+2. **Dietitian:** Log in → Review pending requests → Approve/reject (with reason) → Review patient meal logs → Create/update consultation notes → Provide recommendations → Complete appointment → Join assigned video session.
+
+Appointment scheduling includes conflict detection (60-minute duration), past-time prevention, and role-based access control enforced on the Django backend. Only the assigned consumer and assigned dietitian can access an appointment's video room, and only after approval.
+
 ## Security reminders
 
+- The embedded Jitsi Meet video room is accessible only for approved appointments and only to the assigned consumer and dietitian (`video_room`).
+- The video interface includes camera/microphone permission guidance, a return-to-dashboard link, and privacy disclaimers.
 - Never commit `.env`, secret keys, database passwords, or production connection strings.
 - Keep `DJANGO_DEBUG=False` in production.
 - Use a separate secret key for local development and production.

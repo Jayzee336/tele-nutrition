@@ -6,7 +6,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from .forms import AppointmentRequestForm
-from .models import Appointment, UserProfile
+from .models import Appointment, ConsultationNote, MealLog, UserProfile
 from .views import has_appointment_conflict
 
 
@@ -468,3 +468,194 @@ class AppointmentSchedulingTests(TestCase):
 
         self.assertFalse(form.is_valid())
         self.assertIn("dietitian", form.errors)
+
+
+class AuthorizationTests(TestCase):
+    """Authorization and access-control tests for important views."""
+
+    def setUp(self):
+        self.consumer = User.objects.create_user(
+            username="auth_consumer",
+            password="TestPassword123!",
+        )
+        UserProfile.objects.create(user=self.consumer, role=UserProfile.CONSUMER)
+
+        self.consumer2 = User.objects.create_user(
+            username="auth_consumer2",
+            password="TestPassword123!",
+        )
+        UserProfile.objects.create(user=self.consumer2, role=UserProfile.CONSUMER)
+
+        self.dietitian = User.objects.create_user(
+            username="auth_dietitian",
+            password="TestPassword123!",
+        )
+        UserProfile.objects.create(user=self.dietitian, role=UserProfile.DIETITIAN)
+
+        self.dietitian2 = User.objects.create_user(
+            username="auth_dietitian2",
+            password="TestPassword123!",
+        )
+        UserProfile.objects.create(user=self.dietitian2, role=UserProfile.DIETITIAN)
+
+        self.appointment = Appointment.objects.create(
+            consumer=self.consumer,
+            dietitian=self.dietitian,
+            scheduled_at=timezone.localtime(timezone.now()) + timedelta(days=7),
+            reason="Test authorization",
+            status="approved",
+        )
+        self.note = ConsultationNote.objects.create(
+            appointment=self.appointment,
+            dietitian=self.dietitian,
+            notes="Clinical notes",
+            recommendations="Eat more vegetables.",
+        )
+
+    # ---------------------------------------------------------
+    # Video room authorization
+    # ---------------------------------------------------------
+
+    def test_video_room_allows_assigned_consumer(self):
+        self.client.force_login(self.consumer)
+        response = self.client.get(
+            reverse("video_room", args=[self.appointment.pk])
+        )
+        self.assertEqual(response.status_code, 200)
+
+    def test_video_room_allows_assigned_dietitian(self):
+        self.client.force_login(self.dietitian)
+        response = self.client.get(
+            reverse("video_room", args=[self.appointment.pk])
+        )
+        self.assertEqual(response.status_code, 200)
+
+    def test_video_room_denies_wrong_consumer(self):
+        self.client.force_login(self.consumer2)
+        response = self.client.get(
+            reverse("video_room", args=[self.appointment.pk])
+        )
+        self.assertRedirects(response, reverse("dashboard"))
+
+    def test_video_room_denies_wrong_dietitian(self):
+        self.client.force_login(self.dietitian2)
+        response = self.client.get(
+            reverse("video_room", args=[self.appointment.pk])
+        )
+        self.assertRedirects(response, reverse("dashboard"))
+
+    def test_video_room_denies_unauthenticated(self):
+        response = self.client.get(
+            reverse("video_room", args=[self.appointment.pk])
+        )
+        self.assertEqual(response.status_code, 302)  # redirect to login
+
+    def test_video_room_denies_unapproved_appointment(self):
+        pending = Appointment.objects.create(
+            consumer=self.consumer,
+            dietitian=self.dietitian,
+            scheduled_at=timezone.localtime(timezone.now()) + timedelta(days=7),
+            reason="Pending",
+            status="pending",
+        )
+        self.client.force_login(self.consumer)
+        response = self.client.get(reverse("video_room", args=[pending.pk]))
+        self.assertRedirects(response, reverse("dashboard"))
+
+    # ---------------------------------------------------------
+    # Consultation note authorization
+    # ---------------------------------------------------------
+
+    def test_note_view_allows_assigned_dietitian(self):
+        self.client.force_login(self.dietitian)
+        response = self.client.get(
+            reverse("consultation_note", args=[self.appointment.pk])
+        )
+        self.assertEqual(response.status_code, 200)
+
+    def test_note_view_denies_wrong_dietitian(self):
+        self.client.force_login(self.dietitian2)
+        response = self.client.get(
+            reverse("consultation_note", args=[self.appointment.pk])
+        )
+        self.assertRedirects(response, reverse("dashboard"))
+
+    def test_note_view_denies_consumer(self):
+        self.client.force_login(self.consumer)
+        response = self.client.get(
+            reverse("consultation_note", args=[self.appointment.pk])
+        )
+        self.assertRedirects(response, reverse("dashboard"))
+
+    def test_note_view_denies_for_pending_appointment(self):
+        pending = Appointment.objects.create(
+            consumer=self.consumer,
+            dietitian=self.dietitian,
+            scheduled_at=timezone.localtime(timezone.now()) + timedelta(days=7),
+            reason="Pending",
+            status="pending",
+        )
+        self.client.force_login(self.dietitian)
+        response = self.client.get(
+            reverse("consultation_note", args=[pending.pk])
+        )
+        self.assertRedirects(response, reverse("dashboard"))
+
+    # ---------------------------------------------------------
+    # Consumer recommendations authorization
+    # ---------------------------------------------------------
+
+    def test_recommendations_allows_assigned_consumer_for_completed(self):
+        completed = Appointment.objects.create(
+            consumer=self.consumer,
+            dietitian=self.dietitian,
+            scheduled_at=timezone.localtime(timezone.now()) + timedelta(days=7),
+            reason="Completed",
+            status="completed",
+        )
+        ConsultationNote.objects.create(
+            appointment=completed,
+            dietitian=self.dietitian,
+            notes="Notes",
+            recommendations="Recommendations",
+        )
+        self.client.force_login(self.consumer)
+        response = self.client.get(
+            reverse("consumer_recommendations", args=[completed.pk])
+        )
+        self.assertEqual(response.status_code, 200)
+
+    def test_recommendations_denies_wrong_consumer(self):
+        self.client.force_login(self.consumer2)
+        response = self.client.get(
+            reverse("consumer_recommendations", args=[self.appointment.pk])
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_recommendations_denies_for_non_completed(self):
+        pending = Appointment.objects.create(
+            consumer=self.consumer,
+            dietitian=self.dietitian,
+            scheduled_at=timezone.localtime(timezone.now()) + timedelta(days=7),
+            reason="Pending",
+            status="approved",
+        )
+        self.client.force_login(self.consumer)
+        response = self.client.get(
+            reverse("consumer_recommendations", args=[pending.pk])
+        )
+        self.assertEqual(response.status_code, 404)
+
+    # ---------------------------------------------------------
+    # Meal log access control
+    # ---------------------------------------------------------
+
+    def test_meal_create_denies_dietitian(self):
+        self.client.force_login(self.dietitian)
+        response = self.client.get(reverse("meal_create"))
+        self.assertRedirects(response, reverse("dashboard"))
+
+    def test_meal_create_allows_consumer(self):
+        self.client.force_login(self.consumer)
+        response = self.client.get(reverse("meal_create"))
+        self.assertEqual(response.status_code, 200)

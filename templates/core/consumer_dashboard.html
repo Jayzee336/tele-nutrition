@@ -152,6 +152,49 @@
         </p>
     </section>
 
+    <!-- Wellness path / next steps -->
+    <section class="consumer-panel" aria-label="Your wellness path" style="margin-top: 30px;">
+        <div class="consumer-panel-header" style="padding-bottom: 14px;">
+            <div class="consumer-panel-title-group">
+                <div class="consumer-panel-icon consumer-panel-icon-green" aria-hidden="true" style="font-size: 1.1rem;">✦</div>
+                <div>
+                    <h2 style="font-size: 1.1rem;">Your wellness path</h2>
+                    <p style="font-size: .82rem; color: #718075; margin-top: 4px;">A quick view of what to do next based on your appointments.</p>
+                </div>
+            </div>
+        </div>
+        <div style="padding: 0 26px 24px; display: flex; flex-direction: column; gap: 10px;">
+            {% if appointments %}
+                {% for appointment in appointments %}
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; border: 1px solid #e3eae0; border-radius: 13px; background: #fbfcf9;">
+                        <div>
+                            <strong style="font-size: .92rem; color: #234635;">{{ appointment.get_status_display }}</strong>
+                            <span style="font-size: .75rem; color: #718075;"> — {{ appointment.scheduled_at|date:"M d, Y, g:i A" }}</span>
+                        </div>
+                        <div style="text-align: right;">
+                            {% if appointment.status == 'approved' %}
+                                <a href="{% url 'video_room' appointment.id %}" style="font-size: .8rem; font-weight: 700; color: #47795d; text-decoration: none;">Join consultation →</a>
+                            {% elif appointment.status == 'completed' and appointment.consultation_note %}
+                                <a href="{% url 'consumer_recommendations' appointment.id %}" style="font-size: .8rem; font-weight: 700; color: #47795d; text-decoration: none;">View recommendations →</a>
+                            {% elif appointment.status == 'pending' %}
+                                <span style="font-size: .78rem; color: #98702a; font-weight: 600;">Awaiting approval</span>
+                            {% elif appointment.status == 'rejected' %}
+                                <span style="font-size: .78rem; color: #a64f45; font-weight: 600;">Request declined</span>
+                            {% elif appointment.status == 'cancelled' %}
+                                <span style="font-size: .78rem; color: #7b857c; font-weight: 600;">Cancelled</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div style="padding: 16px; text-align: center; color: #718075; font-size: .85rem;">
+                    Book a consultation to start your personalized wellness journey.
+                    <a href="{% url 'appointment_create' %}" style="display: inline-block; margin-top: 10px; font-weight: 700; color: #47795d; text-decoration: none;">Book your first consultation →</a>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+
     <!-- Recent meals -->
     <section class="consumer-panel" aria-labelledby="recent-meals-heading">
         <div class="consumer-panel-header">

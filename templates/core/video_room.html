@@ -1,57 +1,155 @@
 {% extends "base.html" %}
 
+{% block title %}Virtual Consultation | NutriConnect{% endblock %}
+
+{% block extra_head %}
+<script src="https://meet.jit.si/external_api.js"></script>
+<style>
+    .video-container {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 12px 0 32px;
+    }
+    .video-page-header {
+        margin-bottom: 20px;
+    }
+    .video-card {
+        border: 1px solid #e5ebe2;
+        border-radius: 20px;
+        background: #fff;
+        box-shadow: 0 6px 24px rgba(35, 70, 53, .04);
+        overflow: hidden;
+        margin-bottom: 20px;
+    }
+    .video-card-body {
+        padding: 22px 26px;
+    }
+    .video-card-body h2 {
+        margin: 0 0 10px;
+        font-size: 1.15rem;
+        color: #234635;
+    }
+    .video-card-body p {
+        margin: 0 0 12px;
+        color: #556b59;
+        font-size: .9rem;
+        line-height: 1.6;
+    }
+    .video-card-body .btn-row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 6px;
+    }
+    #meet {
+        width: 100%;
+        height: 70vh;
+        min-height: 420px;
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid #e5ebe2;
+        background: #f5f7f2;
+    }
+    @media (max-width: 640px) {
+        #meet { height: 55vh; min-height: 320px; }
+        .video-card-body { padding: 18px 16px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { transition-duration: .01ms !important; }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="page-header">
-    <div>
-        <h1>Video Consultation</h1>
-        <p>
-            Appointment with
-            {% if request.user.id == appointment.consumer_id %}
-                your dietitian.
-            {% else %}
-                {{ appointment.consumer.username }}.
-            {% endif %}
-        </p>
+<div class="video-container">
+
+    <header class="video-page-header" style="margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid #e5ebe2;">
+        <div>
+            <h1 style="font-size: clamp(1.6rem, 3.5vw, 2.2rem); margin: 0; letter-spacing: -.04em;">Virtual Consultation</h1>
+            <p style="margin: 6px 0 0; color: #718075; font-size: .95rem;">
+                Appointment with
+                {% if request.user.id == appointment.consumer_id %}
+                    your dietitian.
+                {% else %}
+                    {{ appointment.consumer.username }}.
+                {% endif %}
+            </p>
+        </div>
+    </header>
+
+    <div class="video-card">
+        <div class="video-card-body">
+            <h2>Before you join</h2>
+            <p>
+                This is a secure, appointment-specific meeting room. Check that your microphone and camera are working. Use a quiet place and avoid sharing unnecessary sensitive personal information.
+            </p>
+            <p>
+                <strong>Appointment:</strong> {{ appointment.scheduled_at|date:"M d, Y, g:i A" }} (Asia/Manila)
+            </p>
+            <p style="font-size: .82rem; color: #879287;">
+                Note: This meeting uses the public Jitsi Meet service. It does not provide guaranteed healthcare-grade confidentiality or regulatory compliance. Do not share highly sensitive health details beyond what is needed for the consultation.
+            </p>
+            <div class="btn-row">
+                <a href="{% url 'dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+            </div>
+        </div>
     </div>
+
+    <div id="meet" aria-label="Embedded video consultation room"></div>
+
+    <div class="video-card" style="margin-top: 20px;">
+        <div class="video-card-body">
+            <h2>Meeting information</h2>
+            <p>Only the assigned consumer and dietitian can access this room through NutriConnect. The room is available only for approved appointments.</p>
+            <p>
+                If the meeting does not load or you have audio/video issues, check your internet connection and allow camera and microphone access in your browser settings.
+            </p>
+            <p style="font-size: .82rem; color: #879287; margin-top: 10px;">
+                This room does not support recording through NutriConnect. The public meeting service may have its own policies. For privacy, avoid sharing unnecessary sensitive information.
+            </p>
+        </div>
+    </div>
+
 </div>
 
-<div class="card" style="margin-bottom: 20px;">
-    <h2>Before you join</h2>
-    <p>
-        Check that your microphone and camera are working.
-        Use a quiet place and avoid sharing sensitive personal information
-        during this demonstration.
-    </p>
-
-    <p>
-        <strong>Appointment:</strong>
-        {{ appointment.scheduled_at|date:"M d, Y, h:i A" }}
-    </p>
-
-    <a
-        href="{{ room_url }}"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="btn btn-primary"
-    >
-        Join Video Meeting
-    </a>
-
-    <a href="{% url 'dashboard' %}" class="btn">
-        Back to Dashboard
-    </a>
-</div>
-
-<div class="card">
-    <h2>Meeting information</h2>
-    <p>
-        NutriConnect opens the Jitsi Meet room in a new browser tab.
-        The consumer and assigned dietitian use the same room for
-        this appointment.
-    </p>
-    <p>
-        If the meeting does not open, check your internet connection
-        and allow camera and microphone access in your browser.
-    </p>
-</div>
+<script>
+(function() {
+    "use strict";
+    const domain = "meet.jit.si";
+    const roomName = "NutriConnect-{{ appointment.room_id }}";
+    const options = {
+        roomName: roomName,
+        width: "100%",
+        height: "100%",
+        parentNode: document.getElementById("meet"),
+        configOverwrite: {
+            startWithAudioMuted: false,
+            startWithVideoMuted: false,
+            prejoinPageEnabled: false,
+            disableInviteFunctions: true,
+            toolbarButtons: ["microphone", "camera", "closedcaptions", "fullscreen", "hangup"]
+        },
+        interfaceConfigOverwrite: {
+            TOOLBAR_BUTTONS: ["microphone", "camera", "closedcaptions", "fullscreen", "hangup"],
+            SHOW_JITSI_WATERMARK: false,
+            SHOW_BRAND_WATERMARK: false,
+            DEFAULT_BACKGROUND: "#f5f7f2"
+        }
+    };
+    try {
+        const api = new JitsiMeetExternalAPI(domain, options);
+        // Handle ready event to provide user feedback
+        api.addListener("readyToClose", function() {
+            console.log("Meeting ended.");
+        });
+    } catch (e) {
+        console.error("Failed to initialize Jitsi Meet:", e);
+        var container = document.getElementById("meet");
+        if (container) {
+            container.innerHTML = '<div style="padding: 40px; text-align: center; color: #a64f45; font-weight: 600;">Unable to load the video consultation. Please check your connection and refresh the page, or return to the <a href=\"{% url \'dashboard\' %}\">dashboard</a>.</div>';
+        }
+    }
+})();
+</script>
 {% endblock %}
