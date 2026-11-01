@@ -186,6 +186,12 @@ EMAIL_BACKEND = (
 )
 
 
+# Authentication backends: allow login with username or email.
+AUTHENTICATION_BACKENDS = [
+    "core.authentication.EmailOrUsernameBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
+
 # Default primary key field type.
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 

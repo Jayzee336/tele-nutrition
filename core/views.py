@@ -77,6 +77,7 @@ def register_view(request):
 
         if form.is_valid():
             user = form.save()
+            user.backend = "core.authentication.EmailOrUsernameBackend"
             login(request, user)
 
             messages.success(

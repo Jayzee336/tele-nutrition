@@ -3,199 +3,65 @@
 {% block title %}Log In | NutriConnect{% endblock %}
 
 {% block content %}
-<div class="card auth-card" style="max-width: 500px; margin: 30px auto;">
-    <div class="auth-heading">
-        <span class="auth-eyebrow">NUTRICONNECT</span>
-        <h1>Welcome back</h1>
-        <p class="muted">Log in to your NutriConnect account.</p>
-    </div>
-
-    {% if form.errors %}
-        <div class="message message-error" role="alert">
-            Your username or password was incorrect. Please try again.
-        </div>
-    {% endif %}
-
-    <form method="post" class="auth-form">
-        {% csrf_token %}
-
-        {% for field in form %}
-            <div class="form-group">
-                <label for="{{ field.id_for_label }}">
-                    {{ field.label }}
-                </label>
-                {{ field }}
-
-                {% for error in field.errors %}
-                    <p class="field-error">{{ error }}</p>
-                {% endfor %}
+<div style="display: flex; align-items: center; justify-content: center; padding: 16px 24px; min-height: calc(100svh - 78px - 60px);">
+    <div style="max-width: 420px; width: 100%;">
+        <div style="border: 1px solid #e5ebe2; border-radius: 20px; background: #fff; box-shadow: 0 10px 28px rgba(35, 70, 53, .055); padding: 28px 26px 24px;">
+            <div style="text-align: center; margin-bottom: 20px; padding-top: 4px;">
+                <a href="{% url 'dashboard' %}" aria-label="NutriConnect home" style="display: inline-flex; align-items: center; gap: 9px; text-decoration: none; color: #234635;">
+                    <span style="display: inline-grid; width: 40px; height: 40px; place-items: center; border-radius: 11px; background: linear-gradient(145deg, #edf5e9, #dfece0); color: #47795d; font-weight: 800; font-size: 1rem;">N</span>
+                    <span style="font-family: 'Manrope', sans-serif; font-size: 1.05rem; font-weight: 800; letter-spacing: -.04em;">NutriConnect</span>
+                </a>
             </div>
-        {% endfor %}
+            <div style="margin-bottom: 20px;">
+                <h1 style="font-family: 'Manrope', sans-serif; font-size: clamp(1.4rem, 3vw, 1.75rem); font-weight: 800; color: #234635; margin: 0 0 6px; letter-spacing: -.035em; line-height: 1.15;">Welcome back</h1>
+                <p style="margin: 0; color: #718075; font-size: .88rem; line-height: 1.5;">Log in to your NutriConnect account.</p>
+            </div>
 
-        <input type="hidden" name="next" value="{{ next }}">
+            {% if form.errors %}
+                <div style="margin-bottom: 14px; padding: 11px 13px; border: 1px solid #f0c5c2; border-radius: 10px; background: #fff5f4; color: #a12622; font-size: .83rem; line-height: 1.45;">
+                    Your username or password was incorrect. Please try again.
+                </div>
+            {% endif %}
 
-        <button type="submit" class="btn btn-primary btn-block auth-submit">
-            Log in
-            <span aria-hidden="true">→</span>
-        </button>
-    </form>
+            <form method="post" style="display: flex; flex-direction: column; gap: 12px;">
+                {% csrf_token %}
+                {% for field in form %}
+                    <div style="display: flex; flex-direction: column; gap: 5px;">
+                        <label for="{{ field.id_for_label }}" style="color: #304d3a; font-size: .85rem; font-weight: 700; line-height: 1.35;">
+                            {{ field.label }}
+                        </label>
+                        {{ field }}
+                        {% if field.errors %}
+                            <p style="margin: 2px 0 0; color: #b42318; font-size: .78rem; line-height: 1.35;">{{ field.errors|striptags }}</p>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                <input type="hidden" name="next" value="{{ next }}">
+                <button type="submit" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; margin-top: 4px; padding: 12px 18px; border: 1px solid #47795d; border-radius: 11px; background: #47795d; color: #fff; font: inherit; font-weight: 700; font-size: .9rem; cursor: pointer; transition: background 160ms ease, box-shadow 160ms ease, transform 160ms ease; letter-spacing: -.01em;">
+                    Log in <span aria-hidden="true" style="font-size: .95rem;">→</span>
+                </button>
+            </form>
 
-    <div class="auth-footer">
-        <p>
-            New to NutriConnect?
-            <a href="{% url 'register' %}">Create an account</a>
-        </p>
+            <div style="margin-top: 18px; padding-top: 16px; border-top: 1px solid #edf1eb; text-align: center;">
+                <p style="margin: 0; color: #586b5e; font-size: .82rem; line-height: 1.55;">
+                    New to NutriConnect? <a href="{% url 'register' %}" style="color: #365f48; font-weight: 700; text-decoration: none;">Create an account</a>
+                </p>
+            </div>
+        </div>
     </div>
 </div>
 
 <style>
-    .auth-card {
-        padding: 30px 26px;
-        border-radius: 20px;
+    .auth-card input {
+        width: 100%; min-height: 46px; padding: 10px 13px;
+        border: 1px solid #d6e0d5; border-radius: 10px; background: #fff;
+        color: #24372c; font: inherit; font-size: .93rem; line-height: 1.45;
+        transition: border-color 160ms ease, box-shadow 160ms ease; outline: none;
     }
-
-    .auth-heading {
-        margin-bottom: 24px;
-    }
-
-    .auth-eyebrow {
-        display: inline-block;
-        margin-bottom: 10px;
-        color: #47795d;
-        font-size: 0.76rem;
-        font-weight: 750;
-        letter-spacing: 0.12em;
-    }
-
-    .auth-heading h1 {
-        margin: 0 0 10px;
-        color: #234635;
-        font-size: clamp(1.7rem, 4vw, 2.15rem);
-        line-height: 1.2;
-    }
-
-    .auth-heading p {
-        margin: 0;
-        line-height: 1.6;
-    }
-
-    .auth-form {
-        display: flex;
-        flex-direction: column;
-        gap: 18px;
-    }
-
-    .auth-form .form-group {
-        display: flex;
-        flex-direction: column;
-        gap: 7px;
-    }
-
-    .auth-form label {
-        color: #234635;
-        font-size: 0.9rem;
-        font-weight: 650;
-    }
-
-    .auth-form input {
-        box-sizing: border-box;
-        width: 100%;
-        min-height: 46px;
-        padding: 11px 13px;
-        border: 1px solid #d4dfd3;
-        border-radius: 11px;
-        background: #fff;
-        color: #24372c;
-        font: inherit;
-        transition: border-color 160ms ease, box-shadow 160ms ease;
-    }
-
-    .auth-form input:focus {
-        outline: none;
+    .auth-card input:hover { border-color: #afc6b0; }
+    .auth-card input:focus {
         border-color: #47795d;
-        box-shadow: 0 0 0 3px rgba(71, 121, 93, 0.15);
-    }
-
-    .auth-form .field-error {
-        margin: 0;
-        color: #b42318;
-        font-size: 0.85rem;
-    }
-
-    .auth-form .auth-submit {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        min-height: 48px;
-        margin-top: 2px;
-        padding: 12px 18px;
-        border: 1px solid #47795d;
-        border-radius: 11px;
-        background: #47795d;
-        color: #fff;
-        font: inherit;
-        font-weight: 700;
-        cursor: pointer;
-        transition: background 160ms ease, transform 160ms ease,
-                    box-shadow 160ms ease;
-    }
-
-    .auth-form .auth-submit:hover {
-        background: #365f48;
-        box-shadow: 0 5px 12px rgba(35, 70, 53, 0.16);
-        transform: translateY(-1px);
-    }
-
-    .auth-form .auth-submit:focus-visible {
-        outline: 3px solid rgba(71, 121, 93, 0.35);
-        outline-offset: 3px;
-    }
-
-    .auth-footer {
-        margin-top: 24px;
-        padding-top: 18px;
-        border-top: 1px solid #e8ede5;
-    }
-
-    .auth-footer p {
-        margin: 0;
-        color: #586b5e;
-        line-height: 1.7;
-    }
-
-    .auth-footer a {
-        color: #365f48;
-        font-weight: 650;
-        text-decoration: none;
-    }
-
-    .auth-footer a:hover {
-        text-decoration: underline;
-    }
-
-    .message-error {
-        margin-bottom: 18px;
-        padding: 12px 14px;
-        border: 1px solid #f0c5c2;
-        border-radius: 10px;
-        background: #fff5f4;
-        color: #a12622;
-        line-height: 1.5;
-    }
-
-    @media (max-width: 520px) {
-        .auth-card {
-            margin: 18px auto !important;
-            padding: 24px 19px;
-        }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-        .auth-form input,
-        .auth-form .auth-submit {
-            transition: none;
-        }
+        box-shadow: 0 0 0 3px rgba(71, 121, 93, .12);
     }
 </style>
 {% endblock %}
