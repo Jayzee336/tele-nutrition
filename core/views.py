@@ -3,9 +3,11 @@ from datetime import timedelta
 from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.db import models, transaction
 from django.db.models import Sum
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
@@ -25,6 +27,22 @@ from .models import (
 
 # Each consultation occupies a 60-minute time slot.
 APPOINTMENT_DURATION = timedelta(minutes=60)
+
+
+def admin_required(view_func):
+    def wrapper(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect(
+                f"{reverse('login')}?next={request.path}"
+            )
+        if request.user.is_superuser:
+            return view_func(request, *args, **kwargs)
+        from django.http import HttpResponseForbidden
+        return HttpResponseForbidden(
+            "Access denied: Administrator privileges required."
+        )
+    wrapper.__name__ = view_func.__name__
+    return wrapper
 
 
 def has_appointment_conflict(
@@ -97,6 +115,10 @@ def register_view(request):
 
 @login_required
 def dashboard_view(request):
+    # Superusers must be routed to the custom Admin Dashboard.
+    if request.user.is_superuser:
+        return redirect("admin_dashboard")
+
     profile, _ = UserProfile.objects.get_or_create(user=request.user)
 
     # DIETITIAN DASHBOARD
@@ -636,3 +658,455 @@ def logout_view(request):
         "You have been logged out successfully.",
     )
     return redirect("login")
+
+
+# =====================================================================
+# Custom Admin Dashboard Views
+# =====================================================================
+
+@admin_required
+def admin_dashboard_view(request):
+    total_users = User.objects.count()
+    total_consumers = UserProfile.objects.filter(
+        role=UserProfile.CONSUMER
+    ).count()
+    total_dietitians = UserProfile.objects.filter(
+        role=UserProfile.DIETITIAN
+    ).count()
+    total_appointments = Appointment.objects.count()
+    pending_appointments = Appointment.objects.filter(
+        status="pending"
+    ).count()
+    approved_appointments = Appointment.objects.filter(
+        status="approved"
+    ).count()
+    completed_appointments = Appointment.objects.filter(
+        status="completed"
+    ).count()
+    recent_users = User.objects.order_by("-date_joined")[:10]
+
+    context = {
+        "total_users": total_users,
+        "total_consumers": total_consumers,
+        "total_dietitians": total_dietitians,
+        "total_appointments": total_appointments,
+        "pending_appointments": pending_appointments,
+        "approved_appointments": approved_appointments,
+        "completed_appointments": completed_appointments,
+        "recent_users": recent_users,
+    }
+    return render(
+        request,
+        "core/admin_dashboard.html",
+        context,
+    )
+
+
+@admin_required
+def admin_users_view(request):
+    users = User.objects.all().order_by("-date_joined")
+    query = request.GET.get("q", "").strip()
+    role_filter = request.GET.get("role", "").strip()
+    active_filter = request.GET.get("active", "").strip()
+
+    if query:
+        users = users.filter(
+            models.Q(username__icontains=query)
+            | models.Q(email__icontains=query)
+        )
+    if role_filter:
+        users = users.filter(profile__role=role_filter)
+    if active_filter == "active":
+        users = users.filter(is_active=True)
+    elif active_filter == "inactive":
+        users = users.filter(is_active=False)
+
+    context = {"users": users, "request_get": request.GET}
+    return render(request, "core/admin_users.html", context)
+
+
+@admin_required
+def admin_user_create_view(request):
+    from django.contrib.auth.forms import UserCreationForm
+    from django import forms
+
+    class AdminUserCreateForm(UserCreationForm):
+        email = forms.EmailField(required=True)
+
+        class Meta:
+            model = User
+            fields = [
+                "username",
+                "email",
+                "password1",
+                "password2",
+            ]
+
+    if request.method == "POST":
+        form = AdminUserCreateForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            # Default new admin users to active; role set below.
+            user.is_active = True
+            user.save(update_fields=["is_active"])
+            # Ensure profile exists (consumer by default); admin manages it later
+            profile, _ = UserProfile.objects.get_or_create(
+                user=user,
+                defaults={"role": UserProfile.CONSUMER},
+            )
+            messages.success(
+                request,
+                "User account created successfully.",
+            )
+            return redirect("admin_users")
+    else:
+        form = AdminUserCreateForm()
+    return render(
+        request,
+        "core/admin_user_create.html",
+        {"form": form},
+    )
+
+
+@admin_required
+def admin_user_detail_view(request, user_id):
+    user = get_object_or_404(User, pk=user_id)
+    profile, _ = UserProfile.objects.get_or_create(
+        user=user, defaults={"role": UserProfile.CONSUMER}
+    )
+    context = {"user": user, "profile": profile}
+    return render(
+        request,
+        "core/admin_user_detail.html",
+        context,
+    )
+
+
+@admin_required
+def admin_user_edit_view(request, user_id):
+    user = get_object_or_404(User, pk=user_id)
+    profile, _ = UserProfile.objects.get_or_create(
+        user=user, defaults={"role": UserProfile.CONSUMER}
+    )
+
+    # Protect final superuser
+    if user == request.user and user.is_superuser:
+        messages.error(
+            request,
+            "You cannot deactivate your own administrator account.",
+        )
+
+    if request.method == "POST":
+        username = request.POST.get("username", "").strip()
+        email = request.POST.get("email", "").strip()
+        role = request.POST.get("role", "").strip()
+        is_active = request.POST.get("is_active", "") == "on"
+
+        if not username:
+            messages.error(request, "Username is required.")
+        else:
+            user.username = username
+            user.email = email
+            user.is_active = is_active
+            user.save(update_fields=["username", "email", "is_active"])
+            profile.role = role if role in [
+                UserProfile.CONSUMER,
+                UserProfile.DIETITIAN,
+            ] else UserProfile.CONSUMER
+            profile.save(update_fields=["role"])
+            messages.success(
+                request,
+                "User updated successfully.",
+            )
+            return redirect("admin_user_detail", user_id=user.pk)
+
+    context = {
+        "user": user,
+        "profile": profile,
+        "roles": UserProfile.ROLE_CHOICES,
+    }
+    return render(
+        request,
+        "core/admin_user_edit.html",
+        context,
+    )
+
+
+@admin_required
+@require_POST
+def admin_user_toggle_active_view(request, user_id):
+    user = get_object_or_404(User, pk=user_id)
+    # Prevent deactivating the final superuser
+    if user.is_superuser:
+        superusers = User.objects.filter(is_superuser=True)
+        if superusers.count() <= 1 and not user.is_active:
+            messages.error(
+                request,
+                "Cannot deactivate the final superuser.",
+            )
+            return redirect("admin_users")
+
+    user.is_active = not user.is_active
+    user.save(update_fields=["is_active"])
+    status = "activated" if user.is_active else "deactivated"
+    messages.success(
+        request,
+        f"User {user.username} has been {status}.",
+    )
+    return redirect("admin_users")
+
+
+@admin_required
+def admin_dietitians_view(request):
+    dietitians = User.objects.filter(
+        profile__role=UserProfile.DIETITIAN
+    ).order_by("username")
+    query = request.GET.get("q", "").strip()
+    active_filter = request.GET.get("active", "").strip()
+    if query:
+        dietitians = dietitians.filter(
+            models.Q(username__icontains=query)
+            | models.Q(email__icontains=query)
+        )
+    if active_filter == "active":
+        dietitians = dietitians.filter(is_active=True)
+    elif active_filter == "inactive":
+        dietitians = dietitians.filter(is_active=False)
+    context = {
+        "dietitians": dietitians,
+        "request_get": request.GET,
+    }
+    return render(
+        request,
+        "core/admin_dietitians.html",
+        context,
+    )
+
+
+@admin_required
+def admin_dietitian_create_view(request):
+    from django import forms
+    from django.contrib.auth.forms import UserCreationForm
+
+    class DietitianCreateForm(UserCreationForm):
+        email = forms.EmailField(required=True)
+
+        class Meta:
+            model = User
+            fields = [
+                "username",
+                "email",
+                "password1",
+                "password2",
+            ]
+
+    if request.method == "POST":
+        form = DietitianCreateForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            user.is_active = True
+            user.save(update_fields=["is_active"])
+            UserProfile.objects.create(
+                user=user,
+                role=UserProfile.DIETITIAN,
+            )
+            messages.success(
+                request,
+                "Dietitian account created successfully.",
+            )
+            return redirect("admin_dietitians")
+    else:
+        form = DietitianCreateForm()
+    return render(
+        request,
+        "core/admin_dietitian_create.html",
+        {"form": form},
+    )
+
+
+@admin_required
+def admin_dietitian_detail_view(request, user_id):
+    user = get_object_or_404(
+        User,
+        pk=user_id,
+        profile__role=UserProfile.DIETITIAN,
+    )
+    profile = get_object_or_404(UserProfile, user=user)
+    appointments = Appointment.objects.filter(
+        dietitian=user
+    ).select_related("consumer").order_by("-scheduled_at")[:10]
+    context = {
+        "user": user,
+        "profile": profile,
+        "appointments": appointments,
+    }
+    return render(
+        request,
+        "core/admin_dietitian_detail.html",
+        context,
+    )
+
+
+@admin_required
+def admin_dietitian_edit_view(request, user_id):
+    user = get_object_or_404(User, pk=user_id)
+    profile, _ = UserProfile.objects.get_or_create(
+        user=user,
+        defaults={"role": UserProfile.DIETITIAN},
+    )
+
+    if request.method == "POST":
+        username = request.POST.get("username", "").strip()
+        email = request.POST.get("email", "").strip()
+        is_active = request.POST.get("is_active", "") == "on"
+        if not username:
+            messages.error(request, "Username is required.")
+        else:
+            user.username = username
+            user.email = email
+            user.is_active = is_active
+            user.save(update_fields=["username", "email", "is_active"])
+            profile.role = UserProfile.DIETITIAN
+            profile.save(update_fields=["role"])
+            messages.success(
+                request,
+                "Dietitian updated successfully.",
+            )
+            return redirect(
+                "admin_dietitian_detail",
+                user_id=user.pk,
+            )
+    context = {
+        "user": user,
+        "profile": profile,
+    }
+    return render(
+        request,
+        "core/admin_dietitian_edit.html",
+        context,
+    )
+
+
+@admin_required
+@require_POST
+def admin_dietitian_toggle_active_view(request, user_id):
+    user = get_object_or_404(User, pk=user_id)
+    user.is_active = not user.is_active
+    user.save(update_fields=["is_active"])
+    status = "activated" if user.is_active else "deactivated"
+    messages.success(
+        request,
+        f"Dietitian {user.username} has been {status}.",
+    )
+    return redirect("admin_dietitians")
+
+
+@admin_required
+def admin_consumers_view(request):
+    consumers = User.objects.filter(
+        profile__role=UserProfile.CONSUMER
+    ).order_by("-date_joined")
+    query = request.GET.get("q", "").strip()
+    active_filter = request.GET.get("active", "").strip()
+    if query:
+        consumers = consumers.filter(
+            models.Q(username__icontains=query)
+            | models.Q(email__icontains=query)
+        )
+    if active_filter == "active":
+        consumers = consumers.filter(is_active=True)
+    elif active_filter == "inactive":
+        consumers = consumers.filter(is_active=False)
+    context = {
+        "consumers": consumers,
+        "request_get": request.GET,
+    }
+    return render(
+        request,
+        "core/admin_consumers.html",
+        context,
+    )
+
+
+@admin_required
+def admin_consumer_detail_view(request, user_id):
+    user = get_object_or_404(
+        User,
+        pk=user_id,
+        profile__role=UserProfile.CONSUMER,
+    )
+    profile = get_object_or_404(UserProfile, user=user)
+    appointments = Appointment.objects.filter(
+        consumer=user
+    ).select_related("dietitian").order_by("-scheduled_at")[:10]
+    meal_logs = MealLog.objects.filter(
+        consumer=user
+    ).order_by("-meal_date", "-logged_at")[:10]
+    context = {
+        "user": user,
+        "profile": profile,
+        "appointments": appointments,
+        "meal_logs": meal_logs,
+    }
+    return render(
+        request,
+        "core/admin_consumer_detail.html",
+        context,
+    )
+
+
+@admin_required
+@require_POST
+def admin_consumer_toggle_active_view(request, user_id):
+    user = get_object_or_404(User, pk=user_id)
+    user.is_active = not user.is_active
+    user.save(update_fields=["is_active"])
+    status = "activated" if user.is_active else "deactivated"
+    messages.success(
+        request,
+        f"Consumer {user.username} has been {status}.",
+    )
+    return redirect("admin_consumers")
+
+
+@admin_required
+def admin_appointments_view(request):
+    appointments = Appointment.objects.select_related(
+        "consumer", "dietitian", "cancelled_by"
+    ).order_by("-scheduled_at")
+    query = request.GET.get("q", "").strip()
+    status_filter = request.GET.get("status", "").strip()
+    if query:
+        appointments = appointments.filter(
+            models.Q(consumer__username__icontains=query)
+            | models.Q(dietitian__username__icontains=query)
+            | models.Q(reason__icontains=query)
+        )
+    if status_filter:
+        appointments = appointments.filter(
+            status=status_filter,
+        )
+    context = {
+        "appointments": appointments,
+        "request_get": request.GET,
+        "status_choices": Appointment.STATUS_CHOICES,
+    }
+    return render(
+        request,
+        "core/admin_appointments.html",
+        context,
+    )
+
+
+@admin_required
+def admin_appointment_detail_view(request, appointment_id):
+    appointment = get_object_or_404(
+        Appointment,
+        pk=appointment_id,
+    )
+    context = {"appointment": appointment}
+    return render(
+        request,
+        "core/admin_appointment_detail.html",
+        context,
+    )

@@ -84,4 +84,87 @@ urlpatterns = [
         views.dashboard_view,
         name="dashboard",
     ),
+
+    # Custom Admin Dashboard
+    path(
+        "admin-dashboard/",
+        views.admin_dashboard_view,
+        name="admin_dashboard",
+    ),
+    path(
+        "admin-dashboard/users/",
+        views.admin_users_view,
+        name="admin_users",
+    ),
+    path(
+        "admin-dashboard/users/create/",
+        views.admin_user_create_view,
+        name="admin_user_create",
+    ),
+    path(
+        "admin-dashboard/users/<int:user_id>/",
+        views.admin_user_detail_view,
+        name="admin_user_detail",
+    ),
+    path(
+        "admin-dashboard/users/<int:user_id>/edit/",
+        views.admin_user_edit_view,
+        name="admin_user_edit",
+    ),
+    path(
+        "admin-dashboard/users/<int:user_id>/toggle-active/",
+        views.admin_user_toggle_active_view,
+        name="admin_user_toggle_active",
+    ),
+
+    path(
+        "admin-dashboard/dietitians/",
+        views.admin_dietitians_view,
+        name="admin_dietitians",
+    ),
+    path(
+        "admin-dashboard/dietitians/create/",
+        views.admin_dietitian_create_view,
+        name="admin_dietitian_create",
+    ),
+    path(
+        "admin-dashboard/dietitians/<int:user_id>/",
+        views.admin_dietitian_detail_view,
+        name="admin_dietitian_detail",
+    ),
+    path(
+        "admin-dashboard/dietitians/<int:user_id>/edit/",
+        views.admin_dietitian_edit_view,
+        name="admin_dietitian_edit",
+    ),
+    path(
+        "admin-dashboard/dietitians/<int:user_id>/toggle-active/",
+        views.admin_dietitian_toggle_active_view,
+        name="admin_dietitian_toggle_active",
+    ),
+    path(
+        "admin-dashboard/consumers/",
+        views.admin_consumers_view,
+        name="admin_consumers",
+    ),
+    path(
+        "admin-dashboard/consumers/<int:user_id>/",
+        views.admin_consumer_detail_view,
+        name="admin_consumer_detail",
+    ),
+    path(
+        "admin-dashboard/consumers/<int:user_id>/toggle-active/",
+        views.admin_consumer_toggle_active_view,
+        name="admin_consumer_toggle_active",
+    ),
+    path(
+        "admin-dashboard/appointments/",
+        views.admin_appointments_view,
+        name="admin_appointments",
+    ),
+    path(
+        "admin-dashboard/appointments/<int:appointment_id>/",
+        views.admin_appointment_detail_view,
+        name="admin_appointment_detail",
+    ),
 ]

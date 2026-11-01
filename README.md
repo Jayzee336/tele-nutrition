@@ -184,6 +184,18 @@ The application supports a complete connected workflow:
 
 Appointment scheduling includes conflict detection (60-minute duration), past-time prevention, and role-based access control enforced on the Django backend. Only the assigned consumer and assigned dietitian can access an appointment's video room, and only after approval.
 
+## Administrator access
+
+Superusers (Django `is_superuser`) log in through the same `/accounts/login/` page. After authentication, they are redirected to the custom Admin Dashboard (`/admin-dashboard/`). The built-in Django Admin (`/admin/`) remains available as an internal fallback.
+
+The custom admin interface provides:
+- Platform statistics (users, dietitians, consumers, appointments)
+- User, dietitian, and consumer management
+- Appointment monitoring and details
+- Account activation/deactivation controls
+
+Public registration (`/accounts/register/`) always creates Consumer accounts. Dietitian accounts must be created through the administrator dashboard or Django Admin.
+
 ## Security reminders
 
 - The embedded Jitsi Meet video room is accessible only for approved appointments and only to the assigned consumer and dietitian (`video_room`).

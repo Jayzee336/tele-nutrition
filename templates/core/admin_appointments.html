@@ -1,0 +1,44 @@
+{% extends "core/admin_base.html" %}
+
+{% block title %}Appointments | Admin{% endblock %}
+
+{% block admin_content %}
+<header class="page-header">
+    <div>
+        <p class="eyebrow">Platform administration</p>
+        <h1>Appointment Management</h1>
+        <p class="page-subtitle">Monitor consultations and scheduling.</p>
+    </div>
+</header>
+
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>Consumer</th>
+                <th>Dietitian</th>
+                <th>Scheduled</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for appt in appointments %}
+            <tr>
+                <td><strong>{{ appt.consumer.username }}</strong></td>
+                <td>{{ appt.dietitian.username }}</td>
+                <td>{{ appt.scheduled_at|date:"M d, Y g:i A" }}</td>
+                <td><span class="status-badge status-{{ appt.status }}">{{ appt.get_status_display }}</span></td>
+                <td><span class="table-secondary-text">{{ appt.created_at|date:"M d, Y" }}</span></td>
+                <td>
+                    <a href="{% url 'admin_appointment_detail' appt.id %}" class="btn btn-secondary btn-sm">View</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6"><div class="empty-state" style="padding:28px 16px;"><p>No appointments found.</p></div></td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

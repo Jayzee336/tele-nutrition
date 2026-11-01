@@ -1,0 +1,29 @@
+{% extends "core/admin_base.html" %}
+
+{% block title %}Edit Dietitian | Admin{% endblock %}
+
+{% block admin_content %}
+<header class="page-header">
+    <div><p class="eyebrow">Account management</p><h1>Edit Dietitian</h1></div>
+    <a href="{% url 'admin_dietitian_detail' user.id %}" class="btn btn-ghost">Back</a>
+</header>
+
+<div class="form-card card">
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" value="{{ user.username }}" class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" value="{{ user.email }}" class="form-control">
+        </div>
+        <div class="form-group" style="display:flex;align-items:center;gap:8px;">
+            <input type="checkbox" id="is_active" name="is_active" {% if user.is_active %}checked{% endif %} style="width:auto;">
+            <label for="is_active" style="margin:0;font-weight:600;">Active account</label>
+        </div>
+        <button type="submit" class="btn btn-primary">Save changes</button>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends "core/admin_base.html" %}
+
+{% block title %}Consumer Details | Admin{% endblock %}
+
+{% block admin_content %}
+<header class="page-header">
+    <div>
+        <p class="eyebrow">Account details</p>
+        <h1>{{ user.username }}</h1>
+        <p class="page-subtitle">Consumer profile and activity</p>
+    </div>
+    <a href="{% url 'admin_consumers' %}" class="btn btn-secondary">Back</a>
+</header>
+
+<div class="grid" style="grid-template-columns: 1fr 1fr;">
+    <div class="card">
+        <h3>Account Information</h3>
+        <table style="border:none;box-shadow:none;background:transparent;">
+            <tbody>
+                <tr><td style="padding:8px 4px;color:#718075;font-weight:600;">Username</td><td style="padding:8px 4px;">{{ user.username }}</td></tr>
+                <tr><td style="padding:8px 4px;color:#718075;font-weight:600;">Email</td><td style="padding:8px 4px;">{{ user.email }}</td></tr>
+                <tr><td style="padding:8px 4px;color:#718075;font-weight:600;">Active</td><td style="padding:8px 4px;">{% if user.is_active %}Yes{% else %}No{% endif %}</td></tr>
+                <tr><td style="padding:8px 4px;color:#718075;font-weight:600;">Registered</td><td style="padding:8px 4px;">{{ user.date_joined|date:"M d, Y" }}</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="card">
+        <h3>Recent Appointments</h3>
+        {% if appointments %}
+        <table style="border:none;box-shadow:none;background:transparent;">
+            <thead><tr><th>Dietitian</th><th>Date</th><th>Status</th></tr></thead>
+            <tbody>
+                {% for appt in appointments %}
+                <tr>
+                    <td>{{ appt.dietitian.username }}</td>
+                    <td>{{ appt.scheduled_at|date:"M d, Y g:i A" }}</td>
+                    <td><span class="status-badge status-{{ appt.status }}">{{ appt.get_status_display }}</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="section-subtitle">No appointments found.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="inline-actions" style="margin-top: 16px;">
+    <form method="post" action="{% url 'admin_consumer_toggle_active' user.id %}" style="margin:0;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-secondary btn-sm" onclick="return confirm('Are you sure?')">{% if user.is_active %}Deactivate{% else %}Activate{% endif %}</button>
+    </form>
+</div>
+{% endblock %}

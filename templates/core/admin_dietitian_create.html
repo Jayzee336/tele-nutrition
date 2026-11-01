@@ -1,0 +1,21 @@
+{% extends "core/admin_base.html" %}
+
+{% block title %}Add Dietitian | Admin{% endblock %}
+
+{% block admin_content %}
+<header class="page-header">
+    <div>
+        <p class="eyebrow">Platform administration</p>
+        <h1>New Dietitian Account</h1>
+    </div>
+    <a href="{% url 'admin_dietitians' %}" class="btn btn-ghost">Back</a>
+</header>
+
+<div class="form-card card">
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Create dietitian account</button>
+    </form>
+</div>
+{% endblock %}

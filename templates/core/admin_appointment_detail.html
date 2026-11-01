@@ -1,0 +1,31 @@
+{% extends "core/admin_base.html" %}
+
+{% block title %}Appointment #{{ appointment.id }} | Admin{% endblock %}
+
+{% block admin_content %}
+<header class="page-header">
+    <div>
+        <p class="eyebrow">Appointment details</p>
+        <h1>Appointment #{{ appointment.id }}</h1>
+    </div>
+    <a href="{% url 'admin_appointments' %}" class="btn btn-secondary">Back</a>
+</header>
+
+<div class="card">
+    <h3>Overview</h3>
+    <table style="border:none;box-shadow:none;background:transparent;">
+        <tbody>
+            <tr><td style="padding:8px 4px;color:#718075;font-weight:600;">Consumer</td><td style="padding:8px 4px;">{{ appointment.consumer.username }}</td></tr>
+            <tr><td style="padding:8px 4px;color:#718075;font-weight:600;">Dietitian</td><td style="padding:8px 4px;">{{ appointment.dietitian.username }}</td></tr>
+            <tr><td style="padding:8px 4px;color:#718075;font-weight:600;">Scheduled</td><td style="padding:8px 4px;">{{ appointment.scheduled_at|date:"M d, Y g:i A" }}</td></tr>
+            <tr><td style="padding:8px 4px;color:#718075;font-weight:600;">Status</td><td style="padding:8px 4px;"><span class="status-badge status-{{ appointment.status }}">{{ appointment.get_status_display }}</span></td></tr>
+            <tr><td style="padding:8px 4px;color:#718075;font-weight:600;">Created</td><td style="padding:8px 4px;">{{ appointment.created_at|date:"M d, Y g:i A" }}</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="card" style="margin-top: 20px;">
+    <h3>Reason</h3>
+    <p>{{ appointment.reason }}</p>
+</div>
+{% endblock %}

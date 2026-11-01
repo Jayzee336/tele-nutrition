@@ -1,0 +1,21 @@
+{% extends "core/admin_base.html" %}
+
+{% block title %}Create User | Admin{% endblock %}
+
+{% block admin_content %}
+<header class="page-header">
+    <div>
+        <p class="eyebrow">Platform administration</p>
+        <h1>Create User Account</h1>
+    </div>
+    <a href="{% url 'admin_users' %}" class="btn btn-ghost">Back</a>
+</header>
+
+<div class="form-card card">
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Create account</button>
+    </form>
+</div>
+{% endblock %}

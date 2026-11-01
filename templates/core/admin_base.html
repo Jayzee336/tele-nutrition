@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="display: flex; gap: 28px; max-width: 1440px; margin: 0 auto; padding: 24px 24px 48px;">
+    <aside style="flex: 0 0 240px; min-width: 200px;" aria-label="Admin navigation">
+        <nav style="position: sticky; top: 100px;">
+            <div style="border: 1px solid #e5ebe2; border-radius: 20px; background: #fff; padding: 20px 14px; box-shadow: 0 5px 20px rgba(35,65,45,.035);">
+                <h2 style="font-family: 'Manrope', sans-serif; font-size: 1.05rem; font-weight: 750; color: #234635; margin: 0 0 14px 8px; letter-spacing: -.03em;">Admin</h2>
+                <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px;">
+                    <li>
+                        <a href="{% url 'admin_dashboard' %}" style="display: block; padding: 9px 14px; border-radius: 11px; color: #365641; text-decoration: none; font-weight: 600; font-size: .88rem; transition: background 160ms ease; {% if 'admin_dashboard' in request.resolver_match.url_name %}background: #eaf2e9; color: #234635; font-weight: 750;{% endif %}">Overview</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'admin_users' %}" style="display: block; padding: 9px 14px; border-radius: 11px; color: #365641; text-decoration: none; font-weight: 600; font-size: .88rem; transition: background 160ms ease; {% if 'admin_users' in request.resolver_match.url_name %}background: #eaf2e9; color: #234635; font-weight: 750;{% endif %}">User Management</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'admin_dietitians' %}" style="display: block; padding: 9px 14px; border-radius: 11px; color: #365641; text-decoration: none; font-weight: 600; font-size: .88rem; transition: background 160ms ease; {% if 'admin_dietitians' in request.resolver_match.url_name %}background: #eaf2e9; color: #234635; font-weight: 750;{% endif %}">Dietitian Management</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'admin_consumers' %}" style="display: block; padding: 9px 14px; border-radius: 11px; color: #365641; text-decoration: none; font-weight: 600; font-size: .88rem; transition: background 160ms ease; {% if 'admin_consumers' in request.resolver_match.url_name %}background: #eaf2e9; color: #234635; font-weight: 750;{% endif %}">Consumer Management</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'admin_appointments' %}" style="display: block; padding: 9px 14px; border-radius: 11px; color: #365641; text-decoration: none; font-weight: 600; font-size: .88rem; transition: background 160ms ease; {% if 'admin_appointments' in request.resolver_match.url_name %}background: #eaf2e9; color: #234635; font-weight: 750;{% endif %}">Appointment Management</a>
+                    </li>
+                    <li style="margin-top: 10px; border-top: 1px solid #edf0eb; padding-top: 10px;">
+                        <a href="{% url 'logout' %}" style="display: block; padding: 9px 14px; border-radius: 11px; color: #a64f45; text-decoration: none; font-weight: 600; font-size: .88rem; transition: background 160ms ease;">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </aside>
+
+    <main style="flex: 1; min-width: 0;">
+        {% block admin_content %}{% endblock %}
+    </main>
+</div>
+{% endblock %}

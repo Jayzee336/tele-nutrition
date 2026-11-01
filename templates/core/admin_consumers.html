@@ -1,0 +1,38 @@
+{% extends "core/admin_base.html" %}
+
+{% block title %}Consumers | Admin{% endblock %}
+
+{% block admin_content %}
+<header class="page-header">
+    <div>
+        <p class="eyebrow">Platform administration</p>
+        <h1>Consumer Management</h1>
+        <p class="page-subtitle">Review registered consumer accounts.</p>
+    </div>
+</header>
+
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr><th>Username</th><th>Email</th><th>Registered</th><th>Active</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+            {% for user in consumers %}
+            <tr>
+                <td><strong>{{ user.username }}</strong></td>
+                <td><span class="table-secondary-text">{{ user.email }}</span></td>
+                <td><span class="table-secondary-text">{{ user.date_joined|date:"M d, Y" }}</span></td>
+                <td>{% if user.is_active %}<span style="color:#28734b;font-weight:700;font-size:.8rem;">Active</span>{% else %}<span style="color:#96554b;font-weight:700;font-size:.8rem;">Inactive</span>{% endif %}</td>
+                <td>
+                    <div class="action-group">
+                        <a href="{% url 'admin_consumer_detail' user.id %}" class="btn btn-secondary btn-sm">View</a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5"><div class="empty-state" style="padding:28px 16px;"><p>No consumers found.</p></div></td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

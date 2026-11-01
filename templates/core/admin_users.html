@@ -1,0 +1,52 @@
+{% extends "core/admin_base.html" %}
+
+{% block title %}User Management | Admin{% endblock %}
+
+{% block admin_content %}
+<header class="page-header">
+    <div>
+        <p class="eyebrow">Platform administration</p>
+        <h1>User Management</h1>
+        <p class="page-subtitle">Search, filter, and manage registered accounts.</p>
+    </div>
+    <a href="{% url 'admin_user_create' %}" class="btn btn-primary">Create user</a>
+</header>
+
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Active</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td><strong>{{ user.username }}</strong></td>
+                <td><span class="table-secondary-text">{{ user.email }}</span></td>
+                <td><span class="status-badge status-{{ user.profile.role|default:'consumer' }}">{{ user.profile.get_role_display }}</span></td>
+                <td>
+                    {% if user.is_active %}
+                        <span style="color:#28734b; font-weight:700; font-size:.8rem;">Active</span>
+                    {% else %}
+                        <span style="color:#96554b; font-weight:700; font-size:.8rem;">Inactive</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="action-group">
+                        <a href="{% url 'admin_user_detail' user.id %}" class="btn btn-secondary btn-sm">View</a>
+                        <a href="{% url 'admin_user_edit' user.id %}" class="btn btn-secondary btn-sm">Edit</a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5"><div class="empty-state" style="padding: 28px 16px;"><p>No users found.</p></div></td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

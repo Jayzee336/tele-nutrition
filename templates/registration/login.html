@@ -3,16 +3,17 @@
 {% block title %}Log In | NutriConnect{% endblock %}
 
 {% block content %}
-<div style="display: flex; align-items: center; justify-content: center; padding: 16px 24px; min-height: calc(100svh - 78px - 60px);">
+<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; padding: 16px 24px;">
     <div style="max-width: 420px; width: 100%;">
-        <div style="border: 1px solid #e5ebe2; border-radius: 20px; background: #fff; box-shadow: 0 10px 28px rgba(35, 70, 53, .055); padding: 28px 26px 24px;">
-            <div style="text-align: center; margin-bottom: 20px; padding-top: 4px;">
-                <a href="{% url 'dashboard' %}" aria-label="NutriConnect home" style="display: inline-flex; align-items: center; gap: 9px; text-decoration: none; color: #234635;">
-                    <span style="display: inline-grid; width: 40px; height: 40px; place-items: center; border-radius: 11px; background: linear-gradient(145deg, #edf5e9, #dfece0); color: #47795d; font-weight: 800; font-size: 1rem;">N</span>
-                    <span style="font-family: 'Manrope', sans-serif; font-size: 1.05rem; font-weight: 800; letter-spacing: -.04em;">NutriConnect</span>
-                </a>
-            </div>
-            <div style="margin-bottom: 20px;">
+        <div style="text-align: center; margin-bottom: 20px; padding-top: 4px;">
+            <a href="{% url 'dashboard' %}" aria-label="NutriConnect home" style="display: inline-flex; align-items: center; gap: 9px; text-decoration: none; color: #234635;">
+                <span style="display: inline-grid; width: 38px; height: 38px; place-items: center; border-radius: 11px; background: linear-gradient(145deg, #edf5e9, #dfece0); color: #47795d; font-weight: 800; font-size: .95rem;">N</span>
+                <span style="font-family: 'Manrope', sans-serif; font-size: 1rem; font-weight: 800; letter-spacing: -.04em;">NutriConnect</span>
+            </a>
+        </div>
+
+        <div style="border: 1px solid #e5ebe2; border-radius: 20px; background: #fff; box-shadow: 0 10px 28px rgba(35, 70, 53, .055); padding: 26px 24px 22px;">
+            <div style="margin-bottom: 18px;">
                 <h1 style="font-family: 'Manrope', sans-serif; font-size: clamp(1.4rem, 3vw, 1.75rem); font-weight: 800; color: #234635; margin: 0 0 6px; letter-spacing: -.035em; line-height: 1.15;">Welcome back</h1>
                 <p style="margin: 0; color: #718075; font-size: .88rem; line-height: 1.5;">Log in to your NutriConnect account.</p>
             </div>

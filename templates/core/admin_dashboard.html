@@ -1,0 +1,113 @@
+{% extends "core/admin_base.html" %}
+
+{% block title %}Admin Dashboard | NutriConnect{% endblock %}
+
+{% block admin_content %}
+<div class="page-container">
+    <header class="page-header" style="margin-top: 8px;">
+        <div>
+            <p class="eyebrow">Administrator workspace</p>
+            <h1>Admin Dashboard</h1>
+            <p class="page-subtitle">Overview of the NutriConnect platform, user activity, and appointment status.</p>
+        </div>
+    </header>
+
+    <section class="stats-grid" aria-label="Platform statistics">
+        <article class="stat-card stat-card-accent">
+            <span class="stat-icon" aria-hidden="true">◈</span>
+            <span class="stat-label">Total Users</span>
+            <h2 class="stat-value">{{ total_users }}</h2>
+            <p class="stat-help">Registered accounts</p>
+        </article>
+        <article class="stat-card stat-card-accent">
+            <span class="stat-icon" aria-hidden="true">♡</span>
+            <span class="stat-label">Consumers</span>
+            <h2 class="stat-value">{{ total_consumers }}</h2>
+            <p class="stat-help">Active consumer profiles</p>
+        </article>
+        <article class="stat-card stat-card-accent">
+            <span class="stat-icon" aria-hidden="true">✦</span>
+            <span class="stat-label">Dietitians</span>
+            <h2 class="stat-value">{{ total_dietitians }}</h2>
+            <p class="stat-help">Registered dietitians</p>
+        </article>
+        <article class="stat-card stat-card-accent">
+            <span class="stat-icon" aria-hidden="true">◷</span>
+            <span class="stat-label">Total Appointments</span>
+            <h2 class="stat-value">{{ total_appointments }}</h2>
+            <p class="stat-help">All-time requests</p>
+        </article>
+        <article class="stat-card stat-card-accent">
+            <span class="stat-icon" aria-hidden="true">◈</span>
+            <span class="stat-label">Pending</span>
+            <h2 class="stat-value">{{ pending_appointments }}</h2>
+            <p class="stat-help">Awaiting review</p>
+        </article>
+        <article class="stat-card stat-card-accent">
+            <span class="stat-icon" aria-hidden="true">✓</span>
+            <span class="stat-label">Completed</span>
+            <h2 class="stat-value">{{ completed_appointments }}</h2>
+            <p class="stat-help">Finished consultations</p>
+        </article>
+    </section>
+
+    <section class="dashboard-section" aria-label="Recent registrations">
+        <div class="section-header">
+            <div>
+                <h2>Recently Registered Users</h2>
+                <p class="section-subtitle">The most recent accounts created on the platform.</p>
+            </div>
+            <a href="{% url 'admin_users' %}" class="btn btn-secondary btn-sm">View all users</a>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Registered</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in recent_users %}
+                    <tr>
+                        <td><strong>{{ user.username }}</strong></td>
+                        <td><span class="table-secondary-text">{{ user.email }}</span></td>
+                        <td><span class="table-secondary-text">{{ user.date_joined|date:"M d, Y" }}</span></td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3">
+                            <div class="empty-state" style="padding: 28px 16px;">
+                                <p>No users registered yet.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="dashboard-section" aria-label="Quick navigation">
+        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));">
+            <a href="{% url 'admin_users' %}" class="card" style="text-decoration: none; color: inherit;">
+                <h3>User Management</h3>
+                <p class="section-subtitle">Create, edit, and manage user accounts.</p>
+            </a>
+            <a href="{% url 'admin_dietitians' %}" class="card" style="text-decoration: none; color: inherit;">
+                <h3>Dietitian Management</h3>
+                <p class="section-subtitle">Review and manage dietitian profiles.</p>
+            </a>
+            <a href="{% url 'admin_consumers' %}" class="card" style="text-decoration: none; color: inherit;">
+                <h3>Consumer Management</h3>
+                <p class="section-subtitle">View consumer accounts and status.</p>
+            </a>
+            <a href="{% url 'admin_appointments' %}" class="card" style="text-decoration: none; color: inherit;">
+                <h3>Appointment Management</h3>
+                <p class="section-subtitle">Monitor consultations and scheduling.</p>
+            </a>
+        </div>
+    </section>
+</div>
+{% endblock %}
